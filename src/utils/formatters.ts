@@ -3,13 +3,21 @@ import { CURRENCIES } from '../data/initialData';
 export function formatCurrency(amount: number, currencyCode: string = 'USD'): string {
   const currency = CURRENCIES[currencyCode] || CURRENCIES.USD;
   const converted = amount * (currency.rate || 1.0);
+  const isZeroDecimal = ['JPY', 'KRW', 'VND', 'IDR'].includes(currency.code);
   
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency.code,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(converted);
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.code,
+      minimumFractionDigits: isZeroDecimal ? 0 : 2,
+      maximumFractionDigits: isZeroDecimal ? 0 : 2,
+    }).format(converted);
+  } catch {
+    return `${currency.symbol}${converted.toLocaleString('en-US', {
+      minimumFractionDigits: isZeroDecimal ? 0 : 2,
+      maximumFractionDigits: isZeroDecimal ? 0 : 2,
+    })}`;
+  }
 }
 
 export function formatDate(dateString: string): string {

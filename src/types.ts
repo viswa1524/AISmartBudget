@@ -78,5 +78,8 @@ export interface ChatMessage {
 export interface CurrencyConfig {
   code: string;
   symbol: string;
+  country: string;
+  name: string;
+  flag: string;
   rate: number; // Relative to USD
 }

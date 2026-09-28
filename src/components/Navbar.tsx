@@ -1,5 +1,6 @@
 import React from 'react';
 import { 
+  Home,
   LayoutDashboard, 
   ReceiptText, 
   PiggyBank, 
@@ -12,7 +13,8 @@ import {
   Wallet,
   FileSpreadsheet,
   LogOut,
-  ExternalLink
+  ExternalLink,
+  Globe
 } from 'lucide-react';
 import { CURRENCIES } from '../data/initialData';
 import { User } from 'firebase/auth';
@@ -24,6 +26,7 @@ interface NavbarProps {
   setCurrency: (curr: string) => void;
   onOpenAddModal: () => void;
   onOpenScanModal: () => void;
+  onOpenCurrencyModal: () => void;
   netSavings: number;
   googleUser: User | null;
   onGoogleSignIn: () => void;
@@ -40,6 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setCurrency,
   onOpenAddModal,
   onOpenScanModal,
+  onOpenCurrencyModal,
   googleUser,
   onGoogleSignIn,
   onGoogleSignOut,
@@ -47,14 +51,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   isSyncingSheets,
   spreadsheetUrl,
 }) => {
+  const currentConfig = CURRENCIES[currency] || CURRENCIES.USD;
   const tabs = [
+    { id: 'home', label: 'Home (Gemini)', icon: Home, highlight: true },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transactions', icon: ReceiptText },
     { id: 'budget', label: 'Budget Plan', icon: SlidersHorizontal },
     { id: 'analytics', label: 'Analytics', icon: PieChart },
     { id: 'goals', label: 'Savings Goals', icon: PiggyBank },
     { id: 'bills', label: 'Recurring Bills', icon: CalendarClock },
-    { id: 'ai-assistant', label: 'AI Advisor', icon: Sparkles, highlight: true },
+    { id: 'ai-assistant', label: 'AI Advisor', icon: Sparkles },
   ];
 
   return (
@@ -62,13 +68,18 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Name */}
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950 font-black text-xl">
+          <div 
+            onClick={() => setActiveTab('home')}
+            className="flex items-center space-x-3 cursor-pointer group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950 font-black text-xl group-hover:scale-105 transition">
               <Wallet className="w-5 h-5 text-slate-950" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-lg text-white tracking-tight">AISmartBudget</span>
+                <span className="font-extrabold text-lg text-white tracking-tight group-hover:text-emerald-300 transition">
+                  AISmartBudget
+                </span>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   AI Active
                 </span>
@@ -140,18 +151,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* Currency selector */}
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className="bg-slate-800 text-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
-            >
-              {Object.keys(CURRENCIES).map((c) => (
-                <option key={c} value={c}>
-                  {c} ({CURRENCIES[c].symbol})
-                </option>
-              ))}
-            </select>
+            {/* Country & Currency selector with modal trigger */}
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={onOpenCurrencyModal}
+                title={`Change Country & Currency (Current: ${currentConfig.country} - ${currentConfig.name})`}
+                className="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 hover:border-emerald-500/40 transition"
+              >
+                <span className="text-sm leading-none">{currentConfig.flag}</span>
+                <span className="font-mono text-xs">{currentConfig.code}</span>
+                <span className="text-slate-400 text-[11px] hidden sm:inline">({currentConfig.symbol})</span>
+                <Globe className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
+              </button>
+            </div>
 
             {/* Quick scan receipt button */}
             <button

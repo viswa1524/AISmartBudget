@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
+import { HomeTab } from './components/HomeTab';
 import { DashboardTab } from './components/DashboardTab';
 import { TransactionsTab } from './components/TransactionsTab';
 import { BudgetPlannerTab } from './components/BudgetPlannerTab';
@@ -10,6 +11,7 @@ import { AiAssistantTab } from './components/AiAssistantTab';
 import { TransactionModal } from './components/TransactionModal';
 import { SmartReceiptModal } from './components/SmartReceiptModal';
 import { SmartBudgetModal } from './components/SmartBudgetModal';
+import { CurrencyModal } from './components/CurrencyModal';
 
 import { 
   Transaction, 
@@ -35,7 +37,7 @@ export function App() {
     return localStorage.getItem('aisb_currency') || 'USD';
   });
 
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeTab, setActiveTab] = useState<string>('home');
 
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const saved = localStorage.getItem('aisb_transactions');
@@ -67,6 +69,7 @@ export function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
+  const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false);
 
   // Listen for Google Auth state
   useEffect(() => {
@@ -237,6 +240,7 @@ export function App() {
         setCurrency={setCurrency}
         onOpenAddModal={() => setIsAddModalOpen(true)}
         onOpenScanModal={() => setIsScanModalOpen(true)}
+        onOpenCurrencyModal={() => setIsCurrencyModalOpen(true)}
         netSavings={netSavings}
         googleUser={googleUser}
         onGoogleSignIn={handleGoogleSignIn}
@@ -271,6 +275,22 @@ export function App() {
 
       {/* Main Tab Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {activeTab === 'home' && (
+          <HomeTab
+            transactions={transactions}
+            categories={categories}
+            goals={goals}
+            bills={bills}
+            currency={currency}
+            onAddTransaction={handleAddTransaction}
+            onUpdateCategory={handleUpdateCategory}
+            onAddCategory={handleAddCategory}
+            onAddGoal={handleAddGoal}
+            onNavigateTab={setActiveTab}
+            onOpenCurrencyModal={() => setIsCurrencyModalOpen(true)}
+          />
+        )}
+
         {activeTab === 'dashboard' && (
           <DashboardTab
             transactions={transactions}
@@ -370,6 +390,13 @@ export function App() {
         onApplyPlan={handleApplyBudgetPlan}
         currentIncome={totalIncome}
         currency={currency}
+      />
+
+      <CurrencyModal
+        isOpen={isCurrencyModalOpen}
+        onClose={() => setIsCurrencyModalOpen(false)}
+        selectedCurrency={currency}
+        onSelectCurrency={setCurrency}
       />
     </div>
   );

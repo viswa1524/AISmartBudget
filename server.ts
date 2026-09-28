@@ -424,6 +424,161 @@ app.post('/api/ai/generate-budget-plan', async (req, res) => {
   }
 });
 
+// 5. Omni-Input Single Input Gemini Assistant
+app.post('/api/ai/omni', async (req, res) => {
+  try {
+    const { input, context } = req.body;
+    if (!input || !input.trim()) {
+      return res.status(400).json({ error: 'Input is required' });
+    }
+
+    const trimmedInput = input.trim();
+    const currency = context?.currency || '$';
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    if (ai) {
+      try {
+        const prompt = `You are the central AI financial assistant for AISmartBudget. The user gave this single command or question:
+"${trimmedInput}"
+
+User financial snapshot:
+- Currency: ${currency}
+- Total Income: ${currency}${context?.totalIncome || 0}
+- Total Expense: ${currency}${context?.totalExpense || 0}
+- Net Savings: ${currency}${context?.netSavings || 0}
+- Existing Categories: ${JSON.stringify(context?.categories?.map((c: any) => c.category) || [])}
+- Active Goals: ${JSON.stringify(context?.goals?.map((g: any) => g.title) || [])}
+- Recent Transactions: ${JSON.stringify(context?.transactions?.slice(0, 10) || [])}
+- Current Date: ${currentDate}
+
+Decide what the user intends to do:
+1. "add_transaction": if the user describes spending money or receiving income (e.g., "spent $45 on groceries", "bought coffee for $6", "received 2500 salary").
+   Extract: amount (number), description (clean string), type ("expense" | "income"), category (match existing or best fit), paymentMethod (credit_card | debit_card | cash | bank_transfer | digital_wallet), date (${currentDate}), tags (array of strings).
+2. "set_budget": if the user requests adjusting or setting a category spending limit (e.g., "set dining budget to $300").
+   Extract: category (string), monthlyLimit (number).
+3. "create_goal": if the user wants to start or fund a savings target (e.g., "save 2000 for vacation by August").
+   Extract: title (string), targetAmount (number), deadline (YYYY-MM-DD or default in 6 months), category (string).
+4. "answer": for any question, advice request, analysis, or inquiry (e.g., "how much have I spent?", "how can I save more?", "is my dining too high?").
+
+Formulate a concise, clear, and warm message explaining what action was performed or answering the inquiry directly.`;
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                intent: { 
+                  type: Type.STRING, 
+                  description: 'One of: add_transaction, set_budget, create_goal, answer' 
+                },
+                message: { 
+                  type: Type.STRING, 
+                  description: 'Conversational answer or action confirmation message' 
+                },
+                transactionData: {
+                  type: Type.OBJECT,
+                  properties: {
+                    amount: { type: Type.NUMBER },
+                    description: { type: Type.STRING },
+                    type: { type: Type.STRING },
+                    category: { type: Type.STRING },
+                    paymentMethod: { type: Type.STRING },
+                    date: { type: Type.STRING },
+                    tags: { type: Type.ARRAY, items: { type: Type.STRING } }
+                  }
+                },
+                budgetData: {
+                  type: Type.OBJECT,
+                  properties: {
+                    category: { type: Type.STRING },
+                    monthlyLimit: { type: Type.NUMBER }
+                  }
+                },
+                goalData: {
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    targetAmount: { type: Type.NUMBER },
+                    deadline: { type: Type.STRING },
+                    category: { type: Type.STRING }
+                  }
+                }
+              },
+              required: ['intent', 'message']
+            }
+          }
+        });
+
+        if (response.text) {
+          const parsed = JSON.parse(response.text);
+          return res.json({ success: true, data: parsed, source: 'gemini' });
+        }
+      } catch (geminiErr: any) {
+        console.warn('[AISmartBudget] Gemini Omni failed, falling back to rule engine:', geminiErr?.message);
+      }
+    }
+
+    // Rule-based fallback parser
+    const lower = trimmedInput.toLowerCase();
+    const amountMatch = trimmedInput.match(/(?:\$|€|£|₹)?\s*(\d+(?:\.\d{1,2})?)/);
+    const parsedAmount = amountMatch ? parseFloat(amountMatch[1]) : 0;
+
+    // Check if adding transaction
+    if (parsedAmount > 0 && (lower.includes('spent') || lower.includes('paid') || lower.includes('bought') || lower.includes('got') || lower.includes('earned') || lower.includes('cost') || lower.includes('for') || lower.includes('at'))) {
+      const isIncome = lower.includes('got') || lower.includes('salary') || lower.includes('earned') || lower.includes('payroll') || lower.includes('income');
+      let cat = 'Shopping';
+      if (lower.includes('grocer') || lower.includes('food') || lower.includes('supermarket') || lower.includes('market') || lower.includes('trader')) cat = 'Groceries';
+      else if (lower.includes('coffee') || lower.includes('dinner') || lower.includes('lunch') || lower.includes('cafe') || lower.includes('restaurant')) cat = 'Dining & Cafes';
+      else if (lower.includes('uber') || lower.includes('lyft') || lower.includes('gas') || lower.includes('transit')) cat = 'Transportation';
+      else if (lower.includes('rent') || lower.includes('apartment')) cat = 'Housing & Rent';
+      else if (lower.includes('bill') || lower.includes('utility') || lower.includes('electric') || lower.includes('internet')) cat = 'Utilities & Bills';
+      else if (isIncome) cat = 'Income';
+
+      return res.json({
+        success: true,
+        data: {
+          intent: 'add_transaction',
+          message: `Recorded ${isIncome ? 'income' : 'expense'} of ${currency}${parsedAmount.toFixed(2)} under ${cat}.`,
+          transactionData: {
+            amount: parsedAmount,
+            description: trimmedInput.replace(/spent|paid|bought|for|\$|\d+(\.\d{1,2})?/gi, '').trim() || (isIncome ? 'Income Entry' : 'Expense Entry'),
+            type: isIncome ? 'income' : 'expense',
+            category: cat,
+            paymentMethod: 'credit_card',
+            date: currentDate,
+            tags: ['omni_ai']
+          }
+        },
+        source: 'rule_engine'
+      });
+    }
+
+    // Default conversational reply
+    let reply = `Based on your budget, you have recorded ${currency}${context?.totalIncome || 0} in inflow and ${currency}${context?.totalExpense || 0} in outflow this month.`;
+    if (lower.includes('save') || lower.includes('saving')) {
+      reply = `To boost savings, review your discretionary categories like Dining & Cafes and Shopping. Automating an extra $50 weekly will compound to $2,600/year!`;
+    } else if (lower.includes('how much') || lower.includes('spent') || lower.includes('balance')) {
+      reply = `You have spent ${currency}${context?.totalExpense || 0} so far, leaving a net cash surplus of ${currency}${context?.netSavings || 0} (${context?.savingsRate || 0}% savings rate).`;
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        intent: 'answer',
+        message: reply
+      },
+      source: 'rule_engine'
+    });
+
+  } catch (error: any) {
+    console.error('[AISmartBudget] Omni error:', error);
+    return res.status(500).json({ error: error.message || 'Omni failed' });
+  }
+});
+
 // -------------------------------------------------------------
 // Vite Middleware / Static Files Serving
 // -------------------------------------------------------------
