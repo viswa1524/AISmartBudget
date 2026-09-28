@@ -1,0 +1,7 @@
+{
+  "name": "AISmartBudget",
+  "description": "AI-Powered Budget Management & Financial Assistant with intelligent expense tracking, automated category insights, smart budget forecasting, and savings goal planning.",
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
