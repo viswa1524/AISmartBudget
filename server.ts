@@ -453,14 +453,18 @@ User financial snapshot:
 
 Decide what the user intends to do:
 1. "add_transaction": if the user describes spending money or receiving income (e.g., "spent $45 on groceries", "bought coffee for $6", "received 2500 salary").
-   Extract: amount (number), description (clean string), type ("expense" | "income"), category (match existing or best fit), paymentMethod (credit_card | debit_card | cash | bank_transfer | digital_wallet), date (${currentDate}), tags (array of strings).
+   Extract: amount (number), description (clean concise merchant or title), type ("expense" | "income"), category (match existing or best fit), paymentMethod (credit_card | debit_card | cash | bank_transfer | digital_wallet), date (${currentDate}), tags (array of strings).
 2. "set_budget": if the user requests adjusting or setting a category spending limit (e.g., "set dining budget to $300").
    Extract: category (string), monthlyLimit (number).
 3. "create_goal": if the user wants to start or fund a savings target (e.g., "save 2000 for vacation by August").
    Extract: title (string), targetAmount (number), deadline (YYYY-MM-DD or default in 6 months), category (string).
-4. "answer": for any question, advice request, analysis, or inquiry (e.g., "how much have I spent?", "how can I save more?", "is my dining too high?").
+4. "answer": for questions or advice.
 
-Formulate a concise, clear, and warm message explaining what action was performed or answering the inquiry directly.`;
+CRITICAL INSTRUCTION - MINIMALIST OUTPUT:
+Keep the message strictly minimal, concise, and focused only on essential data.
+- For transactions: e.g. "Recorded ${currency}[amount] for [description] ([category])"
+- For budgets: e.g. "[category] monthly budget updated to ${currency}[limit]"
+- For answers: Provide the direct key figures/facts in 1-2 brief sentences without conversational filler, intros, or pleasantries.`;
 
         const response = await ai.models.generateContent({
           model: 'gemini-3.8-flash',
@@ -476,7 +480,7 @@ Formulate a concise, clear, and warm message explaining what action was performe
                 },
                 message: { 
                   type: Type.STRING, 
-                  description: 'Conversational answer or action confirmation message' 
+                  description: 'Strictly minimal, concise message with only important details' 
                 },
                 transactionData: {
                   type: Type.OBJECT,
@@ -541,7 +545,7 @@ Formulate a concise, clear, and warm message explaining what action was performe
         success: true,
         data: {
           intent: 'add_transaction',
-          message: `Recorded ${isIncome ? 'income' : 'expense'} of ${currency}${parsedAmount.toFixed(2)} under ${cat}.`,
+          message: `${isIncome ? '+' : '-'}${currency}${parsedAmount.toFixed(2)} • ${cat}`,
           transactionData: {
             amount: parsedAmount,
             description: trimmedInput.replace(/spent|paid|bought|for|\$|\d+(\.\d{1,2})?/gi, '').trim() || (isIncome ? 'Income Entry' : 'Expense Entry'),
@@ -556,12 +560,12 @@ Formulate a concise, clear, and warm message explaining what action was performe
       });
     }
 
-    // Default conversational reply
-    let reply = `Based on your budget, you have recorded ${currency}${context?.totalIncome || 0} in inflow and ${currency}${context?.totalExpense || 0} in outflow this month.`;
+    // Default concise reply
+    let reply = `Inflow: ${currency}${context?.totalIncome || 0} • Outflow: ${currency}${context?.totalExpense || 0} • Net: ${currency}${context?.netSavings || 0}`;
     if (lower.includes('save') || lower.includes('saving')) {
-      reply = `To boost savings, review your discretionary categories like Dining & Cafes and Shopping. Automating an extra $50 weekly will compound to $2,600/year!`;
+      reply = `Discretionary dining & shopping is your highest potential area for savings. Automating +$50/wk yields +$2,600/yr.`;
     } else if (lower.includes('how much') || lower.includes('spent') || lower.includes('balance')) {
-      reply = `You have spent ${currency}${context?.totalExpense || 0} so far, leaving a net cash surplus of ${currency}${context?.netSavings || 0} (${context?.savingsRate || 0}% savings rate).`;
+      reply = `Total spent: ${currency}${context?.totalExpense || 0} • Net surplus: ${currency}${context?.netSavings || 0} (${context?.savingsRate || 0}% savings rate).`;
     }
 
     return res.json({
