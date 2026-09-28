@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, Type } from '@google/genai';
 
@@ -49,51 +50,57 @@ app.post('/api/ai/audit', async (req, res) => {
     // If Gemini client is available, generate an intelligent analysis
     if (ai) {
       try {
-        const prompt = `Analyze this user's monthly financial budget data and provide a detailed financial health audit report:
+        const prompt = `Analyze this user's monthly money numbers and draft a financial review in VERY SIMPLE, EVERYDAY WORDS that any person or client can easily understand:
 Currency: ${currency}
-Monthly Income: ${currency}${totalIncome}
-Monthly Expenses: ${currency}${totalExpense}
-Net Savings: ${currency}${netSavings} (Savings Rate: ${savingsRate}%)
+Monthly Money In (Income): ${currency}${totalIncome}
+Monthly Money Out (Expenses): ${currency}${totalExpense}
+Money Left Over (Savings): ${currency}${netSavings} (Saving ${savingsRate}% of earnings)
 Budget Categories with limits: ${JSON.stringify(categories)}
 Active Savings Goals: ${JSON.stringify(goals)}
 Recent Transactions: ${JSON.stringify(transactions?.slice(0, 20))}
 
-Provide an objective financial audit grading (A+, A, B, C, D, or F), numeric score (0-100), key strengths, critical risks, specific actionable advice to save money, and recommended budget adjustments.`;
+IMPORTANT WRITING STYLE RULES:
+1. Use SIMPLE, EVERYDAY WORDS only. Avoid heavy financial jargon, Wall Street buzzwords, or complicated corporate terms.
+2. Instead of "discretionary outflow optimization", write "Cook at home more & cut down eating out".
+3. Instead of "contingency runway buffer", write "Rainy-day emergency fund".
+4. Instead of "expenditure variance", write "Where your money went".
+5. Keep explanations short, friendly, direct, and encouraging.
+6. Provide an easy letter grade (A+, A, B, C, D, or F), a score out of 100, 2-3 positive things done well, 1-2 easy things to watch out for, and 3 clear, practical tips to save more money each month.`;
 
         const response = await ai.models.generateContent({
           model: 'gemini-3.8-flash',
           contents: prompt,
           config: {
-            systemInstruction: 'You are a certified senior financial planner and budget auditor. Provide concise, realistic, high-impact advice.',
+            systemInstruction: 'You are a warm, helpful personal money coach. Always explain financial concepts using simple, plain, conversational words that anyone can instantly understand and act upon without confusion.',
             responseMimeType: 'application/json',
             responseSchema: {
               type: Type.OBJECT,
               properties: {
-                overallScore: { type: Type.NUMBER, description: 'Overall financial health score from 0 to 100' },
-                healthGrade: { type: Type.STRING, description: 'Grade like A+, A, B, C, D, F' },
-                summary: { type: Type.STRING, description: 'Executive summary of financial health' },
-                savingsRate: { type: Type.NUMBER, description: 'Savings rate percentage' },
-                monthlyBurnRate: { type: Type.NUMBER, description: 'Average monthly expense' },
-                projectedRunwayMonths: { type: Type.NUMBER, description: 'Emergency buffer in months' },
+                overallScore: { type: Type.NUMBER, description: 'Overall money score from 0 to 100' },
+                healthGrade: { type: Type.STRING, description: 'Simple grade like A+, A, B, C, D, F' },
+                summary: { type: Type.STRING, description: 'Executive summary written in simple, plain, friendly language' },
+                savingsRate: { type: Type.NUMBER, description: 'Percentage of money saved' },
+                monthlyBurnRate: { type: Type.NUMBER, description: 'Total money spent each month' },
+                projectedRunwayMonths: { type: Type.NUMBER, description: 'How many months rainy day fund will last' },
                 keyStrengths: {
                   type: Type.ARRAY,
                   items: { type: Type.STRING },
-                  description: 'List of 2-4 financial strengths'
+                  description: '2-4 simple, encouraging things the user is doing right'
                 },
                 criticalRisks: {
                   type: Type.ARRAY,
                   items: { type: Type.STRING },
-                  description: 'List of 1-3 financial risks or leakages'
+                  description: '1-3 simple money leaks or things to watch out for in plain words'
                 },
                 recommendedActions: {
                   type: Type.ARRAY,
                   items: {
                     type: Type.OBJECT,
                     properties: {
-                      title: { type: Type.STRING },
+                      title: { type: Type.STRING, description: 'Short, simple action title in everyday words' },
                       impact: { type: Type.STRING, description: 'High, Medium, or Low' },
-                      description: { type: Type.STRING },
-                      potentialSavings: { type: Type.NUMBER }
+                      description: { type: Type.STRING, description: 'Simple explanation of how to do it' },
+                      potentialSavings: { type: Type.NUMBER, description: 'Estimated dollars saved per month' }
                     },
                     required: ['title', 'impact', 'description', 'potentialSavings']
                   }
@@ -106,7 +113,7 @@ Provide an objective financial audit grading (A+, A, B, C, D, or F), numeric sco
                       category: { type: Type.STRING },
                       currentSpending: { type: Type.NUMBER },
                       recommendedLimit: { type: Type.NUMBER },
-                      action: { type: Type.STRING }
+                      action: { type: Type.STRING, description: 'Simple suggestion for this category' }
                     },
                     required: ['category', 'currentSpending', 'recommendedLimit', 'action']
                   }
@@ -119,14 +126,14 @@ Provide an objective financial audit grading (A+, A, B, C, D, or F), numeric sco
 
         if (response.text) {
           const parsed = JSON.parse(response.text);
-          return res.json({ success: true, data: parsed, source: 'gemini' });
+          return res.json({ success: true, data: parsed, report: parsed, source: 'gemini' });
         }
       } catch (geminiErr: any) {
         console.warn('[AISmartBudget] Gemini API audit failed, using intelligent algorithm fallback:', geminiErr?.message);
       }
     }
 
-    // Intelligent Fallback Algorithm
+    // Intelligent Fallback Algorithm (Drafted in Simple Words)
     let score = 50;
     if (savingsRate >= 20) score += 25;
     else if (savingsRate >= 10) score += 15;
@@ -144,36 +151,36 @@ Provide an objective financial audit grading (A+, A, B, C, D, or F), numeric sco
     const fallbackAudit = {
       overallScore: Math.min(Math.max(score, 15), 98),
       healthGrade: grade,
-      summary: `Your cash flow shows a healthy ${savingsRate}% savings rate with steady monthly income. Reallocating discretionary dining and subscription costs can boost your emergency fund timeline by 2.4 months.`,
+      summary: `Here is your simple money summary: You brought in ${currency}${totalIncome.toLocaleString()} and spent ${currency}${totalExpense.toLocaleString()}, leaving ${currency}${Math.max(0, netSavings).toLocaleString()} in your pocket (${savingsRate}% saved). You are making good progress, and cutting down on a few casual expenses can help you reach your goals even faster.`,
       savingsRate: savingsRate,
       monthlyBurnRate: totalExpense,
       projectedRunwayMonths: 4.8,
       keyStrengths: [
-        `Positive monthly net cash flow of ${currency}${Math.max(0, netSavings).toFixed(2)}`,
-        'Consistent income streams and active savings goal contributions',
-        'Fixed housing costs remain under 35% of total income'
+        `You have ${currency}${Math.max(0, netSavings).toLocaleString()} left over every month after all bills are paid.`,
+        'You have clear savings goals and keep track of where money goes.',
+        'Your big essential living costs remain well within a safe range.'
       ],
       criticalRisks: [
-        'Discretionary dining & shopping accounts for over 22% of total outflow',
-        'Recurring subscription services can accumulate unmonitored over time'
+        'Eating out and casual shopping take up a large slice of your monthly spending.',
+        'Monthly subscriptions can quietly add up if not checked regularly.'
       ],
       recommendedActions: [
         {
-          title: 'Implement 50/30/20 Rule Balancing',
+          title: 'Try the 50/30/20 Simple Budget Rule',
           impact: 'High',
-          description: `Align monthly income: 50% essentials (${currency}${(totalIncome * 0.5).toFixed(0)}), 30% lifestyle (${currency}${(totalIncome * 0.3).toFixed(0)}), and 20% savings (${currency}${(totalIncome * 0.2).toFixed(0)}).`,
+          description: `Aim to split your take-home pay: 50% for needs (${currency}${(totalIncome * 0.5).toFixed(0)}), 30% for fun & lifestyle (${currency}${(totalIncome * 0.3).toFixed(0)}), and 20% straight into savings (${currency}${(totalIncome * 0.2).toFixed(0)}).`,
           potentialSavings: Math.round(totalExpense * 0.12)
         },
         {
-          title: 'Trim Dining Out and Coffee Spends',
+          title: 'Cook at Home a Few More Days a Week',
           impact: 'Medium',
-          description: 'Capping dining visits to 2x per week and meal-prepping can easily recover discretionary cash.',
+          description: 'Eating out or grabbing takeaway just 2 fewer times a week puts easy money right back in your bank account.',
           potentialSavings: 180
         },
         {
-          title: 'Audit Inactive Digital Subscriptions',
+          title: 'Cancel Any Subscriptions You Do Not Use',
           impact: 'Medium',
-          description: 'Review streaming services and unused recurring charges to immediately eliminate leakage.',
+          description: 'Check your recurring apps and streaming services. Cancelling 1 or 2 unused plans is instant free savings.',
           potentialSavings: 45
         }
       ],
@@ -182,18 +189,18 @@ Provide an objective financial audit grading (A+, A, B, C, D, or F), numeric sco
           category: 'Dining & Cafes',
           currentSpending: 320,
           recommendedLimit: 250,
-          action: 'Cap by 20% to redirect towards high-yield savings'
+          action: 'Cook at home more often to save cash'
         },
         {
           category: 'Shopping',
           currentSpending: 280,
           recommendedLimit: 200,
-          action: 'Introduce a 48-hour pause rule for non-essential purchases'
+          action: 'Wait 2 days before buying items you do not urgently need'
         }
       ]
     };
 
-    return res.json({ success: true, data: fallbackAudit, source: 'computed' });
+    return res.json({ success: true, data: fallbackAudit, report: fallbackAudit, source: 'computed' });
   } catch (error: any) {
     console.error('[AISmartBudget] Audit handler error:', error);
     return res.status(500).json({ error: error.message || 'Audit failed' });
@@ -580,6 +587,98 @@ Keep the message strictly minimal, concise, and focused only on essential data.
   } catch (error: any) {
     console.error('[AISmartBudget] Omni error:', error);
     return res.status(500).json({ error: error.message || 'Omni failed' });
+  }
+});
+
+// -------------------------------------------------------------
+// FastAPI & Gemini Budget Splitter API Endpoint (matches main.py)
+// -------------------------------------------------------------
+app.post('/api/fastapi/plan', async (req, res) => {
+  const { budget, goal } = req.body;
+  const numBudget = Number(budget) || 1000;
+  const goalStr = goal?.trim() || 'Living room renovation';
+
+  if (ai) {
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Split a budget of ${numBudget} for ${goalStr}`
+      });
+      return res.json({
+        success: true,
+        budget: numBudget,
+        goal: goalStr,
+        result: response.text
+      });
+    } catch (err: any) {
+      console.error('FastAPI Plan error:', err);
+    }
+  }
+
+  // Rule-based fallback if offline/no key
+  return res.json({
+    success: true,
+    budget: numBudget,
+    goal: goalStr,
+    result: `Actionable Budget Allocation for ${goalStr} ($${numBudget}):\n• Primary Materials & Hardware: $${(numBudget * 0.45).toFixed(0)} (45%)\n• Labor & Craftsmanship: $${(numBudget * 0.30).toFixed(0)} (30%)\n• Delivery & Auxiliary Costs: $${(numBudget * 0.10).toFixed(0)} (10%)\n• Emergency & Contingency Buffer: $${(numBudget * 0.15).toFixed(0)} (15%)`
+  });
+});
+
+// -------------------------------------------------------------
+// Live Code Format & Repository Exporter
+// -------------------------------------------------------------
+app.get('/api/code-files', (_req, res) => {
+  try {
+    const fileList = [
+      'main.py',
+      'templates/index.html',
+      'requirements.txt',
+      'package.json',
+      'vite.config.ts',
+      'tsconfig.json',
+      'server.ts',
+      'index.html',
+      'src/main.tsx',
+      'src/App.tsx',
+      'src/types.ts',
+      'src/index.css',
+      'src/data/initialData.ts',
+      'src/utils/formatters.ts',
+      'src/services/googleSheets.ts',
+      'src/components/HomeTab.tsx',
+      'src/components/DashboardTab.tsx',
+      'src/components/TransactionsTab.tsx',
+      'src/components/BudgetPlannerTab.tsx',
+      'src/components/AnalyticsTab.tsx',
+      'src/components/SavingsGoalsTab.tsx',
+      'src/components/RecurringBillsTab.tsx',
+      'src/components/AiAssistantTab.tsx',
+      'src/components/Navbar.tsx',
+      'src/components/TransactionModal.tsx',
+      'src/components/SmartReceiptModal.tsx',
+      'src/components/SmartBudgetModal.tsx',
+      'src/components/CurrencyModal.tsx'
+    ];
+
+    const files = fileList.map((relPath) => {
+      const fullPath = path.resolve(__dirname, relPath);
+      let content = '';
+      if (fs.existsSync(fullPath)) {
+        content = fs.readFileSync(fullPath, 'utf-8');
+      }
+      return {
+        path: relPath,
+        name: path.basename(relPath),
+        ext: path.extname(relPath).replace('.', ''),
+        lines: content.split('\n').length,
+        size: Buffer.byteLength(content, 'utf8'),
+        content
+      };
+    });
+
+    res.json({ success: true, files });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to retrieve code files' });
   }
 });
 

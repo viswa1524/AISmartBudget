@@ -115,9 +115,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         const { intent, message, transactionData, budgetData, goalData } = res.data;
 
         // Perform side-effect actions automatically
+        const rate = currentCurrency.rate || 1.0;
+        let processedActionData = transactionData || budgetData || goalData;
+
         if (intent === 'add_transaction' && transactionData) {
+          const rawAmount = Number(transactionData.amount) || 0;
+          const baseAmount = rawAmount / rate;
           onAddTransaction({
-            amount: Number(transactionData.amount) || 0,
+            amount: baseAmount,
             description: transactionData.description || 'Expense Entry',
             type: transactionData.type === 'income' ? 'income' : 'expense',
             category: transactionData.category || 'Shopping',
@@ -125,22 +130,27 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             date: transactionData.date || new Date().toISOString().split('T')[0],
             tags: transactionData.tags || ['gemini_entry'],
           });
+          processedActionData = { ...transactionData, amount: baseAmount };
         } else if (intent === 'set_budget' && budgetData) {
+          const rawLimit = Number(budgetData.monthlyLimit) || 0;
+          const baseLimit = rawLimit / rate;
           const existing = categories.find((c) => c.category.toLowerCase() === budgetData.category.toLowerCase());
           if (existing) {
-            onUpdateCategory(existing.id, { monthlyLimit: Number(budgetData.monthlyLimit) });
+            onUpdateCategory(existing.id, { monthlyLimit: baseLimit });
           } else {
             onAddCategory({
               category: budgetData.category,
-              monthlyLimit: Number(budgetData.monthlyLimit),
+              monthlyLimit: baseLimit,
               color: '#3b82f6',
               alertThreshold: 0.85,
             });
           }
         } else if (intent === 'create_goal' && goalData) {
+          const rawTarget = Number(goalData.targetAmount) || 0;
+          const baseTarget = rawTarget / rate;
           onAddGoal({
             title: goalData.title,
-            targetAmount: Number(goalData.targetAmount),
+            targetAmount: baseTarget,
             currentAmount: 0,
             deadline: goalData.deadline || '2026-12-31',
             category: goalData.category || 'Savings',
@@ -153,7 +163,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           query: text.trim(),
           intent,
           message,
-          actionData: transactionData || budgetData || goalData,
+          actionData: processedActionData,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           source: res.source,
         };

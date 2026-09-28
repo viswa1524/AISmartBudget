@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Calendar, DollarSign, Tag, CreditCard } from 'lucide-react';
 import { Transaction, TransactionType, PaymentMethod, BudgetCategory } from '../types';
+import { CURRENCIES } from '../data/initialData';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -37,9 +38,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       .map((t) => t.trim().toLowerCase())
       .filter(Boolean);
 
+    const rate = CURRENCIES[currency]?.rate || 1.0;
     onSave({
       description: description.trim(),
-      amount: Number(amount),
+      amount: Number(amount) / rate,
       type,
       category: type === 'income' ? 'Income' : category,
       paymentMethod,

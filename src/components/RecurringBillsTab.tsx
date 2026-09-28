@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { RecurringBill } from '../types';
 import { formatCurrency } from '../utils/formatters';
+import { CURRENCIES } from '../data/initialData';
 
 interface RecurringBillsTabProps {
   bills: RecurringBill[];
@@ -49,9 +50,10 @@ export const RecurringBillsTab: React.FC<RecurringBillsTabProps> = ({
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
+    const rate = CURRENCIES[currency]?.rate || 1.0;
     onAddBill({
       name: name.trim(),
-      amount: Number(amount),
+      amount: Number(amount) / rate,
       frequency,
       dueDay: Number(dueDay),
       category,
@@ -161,11 +163,7 @@ export const RecurringBillsTab: React.FC<RecurringBillsTabProps> = ({
                   </div>
 
                   <button
-                    onClick={() => {
-                      if (window.confirm(`Delete subscription "${b.name}"?`)) {
-                        onDeleteBill(b.id);
-                      }
-                    }}
+                    onClick={() => onDeleteBill(b.id)}
                     className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

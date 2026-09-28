@@ -8,6 +8,7 @@ import { AnalyticsTab } from './components/AnalyticsTab';
 import { SavingsGoalsTab } from './components/SavingsGoalsTab';
 import { RecurringBillsTab } from './components/RecurringBillsTab';
 import { AiAssistantTab } from './components/AiAssistantTab';
+import { ReportsAndExportTab } from './components/ReportsAndExportTab';
 import { TransactionModal } from './components/TransactionModal';
 import { SmartReceiptModal } from './components/SmartReceiptModal';
 import { SmartBudgetModal } from './components/SmartBudgetModal';
@@ -26,10 +27,6 @@ import {
   INITIAL_SAVINGS_GOALS, 
   INITIAL_RECURRING_BILLS 
 } from './data/initialData';
-
-import { User } from 'firebase/auth';
-import { initAuth, googleSignIn, logoutGoogle } from './services/googleAuth';
-import { exportBudgetToGoogleSheets } from './services/googleSheets';
 
 export function App() {
   // Persisted state with local storage fallback
@@ -59,64 +56,11 @@ export function App() {
     return saved ? JSON.parse(saved) : INITIAL_RECURRING_BILLS;
   });
 
-  // Google Workspace auth & sync state
-  const [googleUser, setGoogleUser] = useState<User | null>(null);
-  const [isSyncingSheets, setIsSyncingSheets] = useState(false);
-  const [spreadsheetUrl, setSpreadsheetUrl] = useState<string | null>(null);
-  const [syncStatus, setSyncStatus] = useState<string | null>(null);
-
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false);
-
-  // Listen for Google Auth state
-  useEffect(() => {
-    const unsubscribe = initAuth(
-      (user) => setGoogleUser(user),
-      () => setGoogleUser(null)
-    );
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, []);
-
-  const handleGoogleSignIn = async () => {
-    try {
-      const res = await googleSignIn();
-      if (res?.user) {
-        setGoogleUser(res.user);
-      }
-    } catch (err: any) {
-      console.error('Google Sign In failed:', err);
-    }
-  };
-
-  const handleGoogleSignOut = async () => {
-    await logoutGoogle();
-    setGoogleUser(null);
-    setSpreadsheetUrl(null);
-  };
-
-  const handleSyncSheets = async () => {
-    if (!googleUser) {
-      handleGoogleSignIn();
-      return;
-    }
-    setIsSyncingSheets(true);
-    setSyncStatus(null);
-    try {
-      const res = await exportBudgetToGoogleSheets(transactions, categories, currency);
-      setSpreadsheetUrl(res.spreadsheetUrl);
-      setSyncStatus(`Successfully exported to Google Sheets!`);
-    } catch (err: any) {
-      console.error('Sheets export error:', err);
-      setSyncStatus(`Sync error: ${err.message || 'Failed to export'}`);
-    } finally {
-      setIsSyncingSheets(false);
-    }
-  };
 
   // Sync to local storage
   useEffect(() => {
@@ -242,36 +186,7 @@ export function App() {
         onOpenScanModal={() => setIsScanModalOpen(true)}
         onOpenCurrencyModal={() => setIsCurrencyModalOpen(true)}
         netSavings={netSavings}
-        googleUser={googleUser}
-        onGoogleSignIn={handleGoogleSignIn}
-        onGoogleSignOut={handleGoogleSignOut}
-        onSyncSheets={handleSyncSheets}
-        isSyncingSheets={isSyncingSheets}
-        spreadsheetUrl={spreadsheetUrl}
       />
-
-      {/* Sync Notification Banner if active */}
-      {syncStatus && (
-        <div className="bg-emerald-950/80 border-b border-emerald-500/30 px-4 py-2 text-center text-xs text-emerald-300 flex items-center justify-center space-x-2">
-          <span>{syncStatus}</span>
-          {spreadsheetUrl && (
-            <a
-              href={spreadsheetUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline font-bold text-white hover:text-emerald-200"
-            >
-              Open in Google Sheets ↗
-            </a>
-          )}
-          <button
-            onClick={() => setSyncStatus(null)}
-            className="text-slate-400 hover:text-white ml-2 text-xs"
-          >
-            ✕
-          </button>
-        </div>
-      )}
 
       {/* Main Tab Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -362,6 +277,16 @@ export function App() {
             transactions={transactions}
             categories={categories}
             goals={goals}
+            currency={currency}
+          />
+        )}
+
+        {activeTab === 'reports' && (
+          <ReportsAndExportTab
+            transactions={transactions}
+            categories={categories}
+            goals={goals}
+            recurringBills={bills}
             currency={currency}
           />
         )}

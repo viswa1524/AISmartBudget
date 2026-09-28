@@ -1,8 +1,12 @@
 import { CURRENCIES } from '../data/initialData';
 
 export function formatCurrency(amount: number, currencyCode: string = 'USD'): string {
-  const currency = CURRENCIES[currencyCode] || CURRENCIES.USD;
-  const converted = amount * (currency.rate || 1.0);
+  const currency = 
+    CURRENCIES[currencyCode] || 
+    Object.values(CURRENCIES).find(c => c.symbol === currencyCode || c.code === currencyCode) || 
+    CURRENCIES.USD;
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
+  const converted = safeAmount * (currency.rate || 1.0);
   const isZeroDecimal = ['JPY', 'KRW', 'VND', 'IDR'].includes(currency.code);
   
   try {

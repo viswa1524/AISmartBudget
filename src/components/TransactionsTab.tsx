@@ -104,10 +104,8 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
 
   const handleBulkDelete = () => {
     if (selectedIds.size === 0) return;
-    if (window.confirm(`Delete ${selectedIds.size} selected transaction(s)?`)) {
-      selectedIds.forEach((id) => onDeleteTransaction(id));
-      setSelectedIds(new Set());
-    }
+    selectedIds.forEach((id) => onDeleteTransaction(id));
+    setSelectedIds(new Set());
   };
 
   return (
@@ -312,11 +310,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                       </td>
                       <td className="py-3 px-4 text-right whitespace-nowrap">
                         <button
-                          onClick={() => {
-                            if (window.confirm(`Delete transaction "${tx.description}"?`)) {
-                              onDeleteTransaction(tx.id);
-                            }
-                          }}
+                          onClick={() => onDeleteTransaction(tx.id)}
                           title="Delete transaction"
                           className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
                         >

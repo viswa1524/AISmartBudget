@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { BudgetCategory, Transaction } from '../types';
 import { formatCurrency } from '../utils/formatters';
+import { CURRENCIES } from '../data/initialData';
 
 interface BudgetPlannerTabProps {
   categories: BudgetCategory[];
@@ -50,13 +51,15 @@ export const BudgetPlannerTab: React.FC<BudgetPlannerTabProps> = ({
   const totalSpent = Object.values(categorySpending).reduce((sum, v) => sum + v, 0);
   const totalVariance = totalBudget - totalSpent;
 
+  const rate = CURRENCIES[currency]?.rate || 1.0;
+
   const handleStartEdit = (cat: BudgetCategory) => {
     setEditingId(cat.id);
-    setEditLimit(cat.monthlyLimit);
+    setEditLimit(Math.round(cat.monthlyLimit * rate));
   };
 
   const handleSaveEdit = (id: string) => {
-    onUpdateCategory(id, { monthlyLimit: Number(editLimit) });
+    onUpdateCategory(id, { monthlyLimit: Number(editLimit) / rate });
     setEditingId(null);
   };
 
@@ -67,7 +70,7 @@ export const BudgetPlannerTab: React.FC<BudgetPlannerTabProps> = ({
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     onAddCategory({
       category: newCategoryName.trim(),
-      monthlyLimit: Number(newCategoryLimit) || 200,
+      monthlyLimit: (Number(newCategoryLimit) || 200) / rate,
       color: randomColor,
       alertThreshold: 0.85,
     });
@@ -212,11 +215,7 @@ export const BudgetPlannerTab: React.FC<BudgetPlannerTabProps> = ({
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={() => {
-                      if (window.confirm(`Delete category "${cat.category}"?`)) {
-                        onDeleteCategory(cat.id);
-                      }
-                    }}
+                    onClick={() => onDeleteCategory(cat.id)}
                     className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
                     title="Remove category"
                   >

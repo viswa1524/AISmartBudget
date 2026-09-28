@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { SavingsGoal } from '../types';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import { CURRENCIES } from '../data/initialData';
 
 interface SavingsGoalsTabProps {
   goals: SavingsGoal[];
@@ -42,13 +43,15 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
   const totalTarget = goals.reduce((acc, g) => acc + g.targetAmount, 0);
   const aggregatePercentage = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
 
+  const rate = CURRENCIES[currency]?.rate || 1.0;
+
   const handleDeposit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!depositGoalId || depositAmount <= 0) return;
     const goal = goals.find((g) => g.id === depositGoalId);
     if (goal) {
       onUpdateGoal(depositGoalId, {
-        currentAmount: goal.currentAmount + Number(depositAmount),
+        currentAmount: goal.currentAmount + (Number(depositAmount) / rate),
       });
     }
     setDepositGoalId(null);
@@ -63,8 +66,8 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
 
     onAddGoal({
       title: newTitle.trim(),
-      targetAmount: Number(newTarget),
-      currentAmount: Number(newInitial),
+      targetAmount: Number(newTarget) / rate,
+      currentAmount: Number(newInitial) / rate,
       deadline: newDeadline,
       category: newCategory,
       color: randomColor,
@@ -143,11 +146,7 @@ export const SavingsGoalsTab: React.FC<SavingsGoalsTabProps> = ({
                 </div>
                 <div className="flex items-center space-x-1.5">
                   <button
-                    onClick={() => {
-                      if (window.confirm(`Delete savings goal "${goal.title}"?`)) {
-                        onDeleteGoal(goal.id);
-                      }
-                    }}
+                    onClick={() => onDeleteGoal(goal.id)}
                     className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

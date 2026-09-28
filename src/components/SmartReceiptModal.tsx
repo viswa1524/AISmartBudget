@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Sparkles, ScanLine, Check, ArrowRight } from 'lucide-react';
 import { Transaction, BudgetCategory } from '../types';
 import { formatCurrency } from '../utils/formatters';
+import { CURRENCIES } from '../data/initialData';
 
 interface SmartReceiptModalProps {
   isOpen: boolean;
@@ -52,9 +53,10 @@ export const SmartReceiptModal: React.FC<SmartReceiptModalProps> = ({
 
   const handleApply = () => {
     if (!parsedData) return;
+    const rate = CURRENCIES[currency]?.rate || 1.0;
     onConfirm({
       description: parsedData.description || 'Parsed Item',
-      amount: Number(parsedData.amount) || 0,
+      amount: (Number(parsedData.amount) || 0) / rate,
       type: parsedData.type === 'income' ? 'income' : 'expense',
       category: parsedData.category || 'Shopping',
       paymentMethod: parsedData.paymentMethod || 'credit_card',
