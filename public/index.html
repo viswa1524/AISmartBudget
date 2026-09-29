@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AISmartBudget - AI Powered Budget Management</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="nav-brand">💰 AISmartBudget</div>
+            <div class="nav-links">
+                <button class="nav-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="nav-btn" data-tab="transactions">Transactions</button>
+                <button class="nav-btn" data-tab="budget">Budget</button>
+                <button class="nav-btn" data-tab="goals">Goals</button>
+                <button class="nav-btn" data-tab="ai">AI Assistant</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboard-tab">
+                <h1>Dashboard</h1>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Monthly Income</h3>
+                        <div class="amount" id="totalIncome">$0</div>
+                    </div>
+                    <div class="card">
+                        <h3>Monthly Expenses</h3>
+                        <div class="amount expense" id="totalExpense">$0</div>
+                    </div>
+                    <div class="card">
+                        <h3>Net Savings</h3>
+                        <div class="amount savings" id="netSavings">$0</div>
+                    </div>
+                    <div class="card">
+                        <h3>Savings Rate</h3>
+                        <div class="amount" id="savingsRate">0%</div>
+                    </div>
+                </div>
+
+                <div class="card full-width">
+                    <h2>Financial Health Report</h2>
+                    <div class="health-report" id="healthReport">
+                        <p>Loading...</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="generateAudit()">Generate Full Audit</button>
+                </div>
+            </div>
+
+            <!-- Transactions Tab -->
+            <div class="tab-content" id="transactions-tab">
+                <h1>Transactions</h1>
+                <div class="card">
+                    <h2>Add Transaction</h2>
+                    <form id="transactionForm" class="form">
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <input type="number" id="txAmount" placeholder="0.00" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" id="txDescription" placeholder="Enter description" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="txCategory" required>
+                                <option value="Groceries">Groceries</option>
+                                <option value="Dining & Cafes">Dining & Cafes</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Utilities & Bills">Utilities & Bills</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Income">Income</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="txType" required>
+                                <option value="expense">Expense</option>
+                                <option value="income">Income</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Transaction</button>
+                    </form>
+                </div>
+
+                <div class="card full-width">
+                    <h2>Recent Transactions</h2>
+                    <div class="transactions-list" id="transactionsList">
+                        <p>No transactions yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Tab -->
+            <div class="tab-content" id="budget-tab">
+                <h1>Budget Planner</h1>
+                <div class="card">
+                    <h2>Generate Budget Plan</h2>
+                    <form id="budgetForm" class="form">
+                        <div class="form-group">
+                            <label>Monthly Income</label>
+                            <input type="number" id="monthlyIncome" placeholder="5000" step="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Budget Style</label>
+                            <select id="budgetStyle">
+                                <option value="balanced">Balanced (50/30/20)</option>
+                                <option value="aggressive_savings">Aggressive Savings</option>
+                                <option value="flexible_lifestyle">Flexible Lifestyle</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Generate Plan</button>
+                    </form>
+                </div>
+
+                <div class="card full-width">
+                    <h2>Budget Breakdown</h2>
+                    <div id="budgetBreakdown">
+                        <p>Generate a plan to see breakdown</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Goals Tab -->
+            <div class="tab-content" id="goals-tab">
+                <h1>Savings Goals</h1>
+                <div class="card">
+                    <h2>Add New Goal</h2>
+                    <form id="goalForm" class="form">
+                        <div class="form-group">
+                            <label>Goal Title</label>
+                            <input type="text" id="goalTitle" placeholder="e.g., Vacation" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Amount</label>
+                            <input type="number" id="goalAmount" placeholder="5000" step="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Date</label>
+                            <input type="date" id="goalDate" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Goal</button>
+                    </form>
+                </div>
+
+                <div class="card full-width">
+                    <h2>Your Goals</h2>
+                    <div id="goalsList" class="goals-list">
+                        <p>No goals yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Assistant Tab -->
+            <div class="tab-content" id="ai-tab">
+                <h1>AI Financial Assistant</h1>
+                <div class="card full-width">
+                    <h2>Chat with SmartBudget AI</h2>
+                    <div class="chat-container">
+                        <div class="messages" id="chatMessages">
+                            <div class="message ai-message">Hello! I'm your financial assistant. Ask me anything about your budget, savings, or financial goals.</div>
+                        </div>
+                        <form id="chatForm" class="chat-input-form">
+                            <input type="text" id="chatInput" placeholder="Ask me about your budget..." required>
+                            <button type="submit" class="btn btn-primary">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>
