@@ -67,65 +67,71 @@ IMPORTANT WRITING STYLE RULES:
 5. Keep explanations short, friendly, direct, and encouraging.
 6. Provide an easy letter grade (A+, A, B, C, D, or F), a score out of 100, 2-3 positive things done well, 1-2 easy things to watch out for, and 3 clear, practical tips to save more money each month.`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
-          contents: prompt,
-          config: {
-            systemInstruction: 'You are a warm, helpful personal money coach. Always explain financial concepts using simple, plain, conversational words that anyone can instantly understand and act upon without confusion.',
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                overallScore: { type: Type.NUMBER, description: 'Overall money score from 0 to 100' },
-                healthGrade: { type: Type.STRING, description: 'Simple grade like A+, A, B, C, D, F' },
-                summary: { type: Type.STRING, description: 'Executive summary written in simple, plain, friendly language' },
-                savingsRate: { type: Type.NUMBER, description: 'Percentage of money saved' },
-                monthlyBurnRate: { type: Type.NUMBER, description: 'Total money spent each month' },
-                projectedRunwayMonths: { type: Type.NUMBER, description: 'How many months rainy day fund will last' },
-                keyStrengths: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                  description: '2-4 simple, encouraging things the user is doing right'
-                },
-                criticalRisks: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                  description: '1-3 simple money leaks or things to watch out for in plain words'
-                },
-                recommendedActions: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      title: { type: Type.STRING, description: 'Short, simple action title in everyday words' },
-                      impact: { type: Type.STRING, description: 'High, Medium, or Low' },
-                      description: { type: Type.STRING, description: 'Simple explanation of how to do it' },
-                      potentialSavings: { type: Type.NUMBER, description: 'Estimated dollars saved per month' }
-                    },
-                    required: ['title', 'impact', 'description', 'potentialSavings']
+        let responseText: string | null = null;
+        try {
+          const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+              systemInstruction: 'You are a warm, helpful personal money coach. Always explain financial concepts using simple, plain, conversational words that anyone can instantly understand and act upon without confusion.',
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  overallScore: { type: Type.NUMBER, description: 'Overall money score from 0 to 100' },
+                  healthGrade: { type: Type.STRING, description: 'Simple grade like A+, A, B, C, D, F' },
+                  summary: { type: Type.STRING, description: 'Executive summary written in simple, plain, friendly language' },
+                  savingsRate: { type: Type.NUMBER, description: 'Percentage of money saved' },
+                  monthlyBurnRate: { type: Type.NUMBER, description: 'Total money spent each month' },
+                  projectedRunwayMonths: { type: Type.NUMBER, description: 'How many months rainy day fund will last' },
+                  keyStrengths: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: '2-4 simple, encouraging things the user is doing right'
+                  },
+                  criticalRisks: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: '1-3 simple money leaks or things to watch out for in plain words'
+                  },
+                  recommendedActions: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        title: { type: Type.STRING, description: 'Short, simple action title in everyday words' },
+                        impact: { type: Type.STRING, description: 'High, Medium, or Low' },
+                        description: { type: Type.STRING, description: 'Simple explanation of how to do it' },
+                        potentialSavings: { type: Type.NUMBER, description: 'Estimated dollars saved per month' }
+                      },
+                      required: ['title', 'impact', 'description', 'potentialSavings']
+                    }
+                  },
+                  budgetAdjustments: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        category: { type: Type.STRING },
+                        currentSpending: { type: Type.NUMBER },
+                        recommendedLimit: { type: Type.NUMBER },
+                        action: { type: Type.STRING, description: 'Simple suggestion for this category' }
+                      },
+                      required: ['category', 'currentSpending', 'recommendedLimit', 'action']
+                    }
                   }
                 },
-                budgetAdjustments: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      category: { type: Type.STRING },
-                      currentSpending: { type: Type.NUMBER },
-                      recommendedLimit: { type: Type.NUMBER },
-                      action: { type: Type.STRING, description: 'Simple suggestion for this category' }
-                    },
-                    required: ['category', 'currentSpending', 'recommendedLimit', 'action']
-                  }
-                }
-              },
-              required: ['overallScore', 'healthGrade', 'summary', 'savingsRate', 'monthlyBurnRate', 'keyStrengths', 'criticalRisks', 'recommendedActions', 'budgetAdjustments']
+                required: ['overallScore', 'healthGrade', 'summary', 'savingsRate', 'monthlyBurnRate', 'keyStrengths', 'criticalRisks', 'recommendedActions', 'budgetAdjustments']
+              }
             }
-          }
-        });
+          });
+          if (response?.text) responseText = response.text;
+        } catch (callErr: any) {
+          console.warn('[AISmartBudget] Primary gemini-2.5-flash call hit limit or error, using smart fallback:', callErr?.message);
+        }
 
-        if (response.text) {
-          const parsed = JSON.parse(response.text);
+        if (responseText) {
+          const parsed = JSON.parse(responseText);
           return res.json({ success: true, data: parsed, report: parsed, source: 'gemini' });
         }
       } catch (geminiErr: any) {
@@ -240,7 +246,7 @@ Provide practical, empowering, and actionable financial advice. Keep your respon
         ];
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+          model: 'gemini-2.5-flash',
           contents: contents as any,
           config: {
             systemInstruction: systemPrompt,
@@ -308,7 +314,7 @@ Identify:
 - tags (array of 1-3 lowercase relevant tags)`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+          model: 'gemini-2.5-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
@@ -474,7 +480,7 @@ Keep the message strictly minimal, concise, and focused only on essential data.
 - For answers: Provide the direct key figures/facts in 1-2 brief sentences without conversational filler, intros, or pleasantries.`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+          model: 'gemini-2.5-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
@@ -622,6 +628,165 @@ app.post('/api/fastapi/plan', async (req, res) => {
     goal: goalStr,
     result: `Actionable Budget Allocation for ${goalStr} ($${numBudget}):\n• Primary Materials & Hardware: $${(numBudget * 0.45).toFixed(0)} (45%)\n• Labor & Craftsmanship: $${(numBudget * 0.30).toFixed(0)} (30%)\n• Delivery & Auxiliary Costs: $${(numBudget * 0.10).toFixed(0)} (10%)\n• Emergency & Contingency Buffer: $${(numBudget * 0.15).toFixed(0)} (15%)`
   });
+});
+
+// -------------------------------------------------------------
+// Persistent Database Layer (Server Storage & REST Endpoints)
+// -------------------------------------------------------------
+const DB_FILE = path.resolve(__dirname, 'db.json');
+
+interface DatabaseSchema {
+  transactions: any[];
+  categories: any[];
+  goals: any[];
+  bills: any[];
+  currency: string;
+  updatedAt: string;
+}
+
+function loadDatabase(): DatabaseSchema {
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const raw = fs.readFileSync(DB_FILE, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.warn('[AISmartBudget] Could not read database file, initializing fresh:', err);
+  }
+  return {
+    transactions: [],
+    categories: [],
+    goals: [],
+    bills: [],
+    currency: 'USD',
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function saveDatabase(data: DatabaseSchema) {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[AISmartBudget] Failed to write database file:', err);
+  }
+}
+
+// 1. Health check & status
+app.get('/api/health', (_req, res) => {
+  const db = loadDatabase();
+  res.json({
+    status: 'ok',
+    uptime: Math.round(process.uptime()),
+    aiConfigured: !!ai,
+    timestamp: new Date().toISOString(),
+    database: {
+      transactionsCount: db.transactions.length,
+      categoriesCount: db.categories.length,
+      goalsCount: db.goals.length,
+      billsCount: db.bills.length
+    },
+    endpoints: [
+      'GET  /api/health',
+      'GET  /api/data',
+      'POST /api/data',
+      'POST /api/transactions',
+      'DELETE /api/transactions/:id',
+      'POST /api/reset-data',
+      'POST /api/ai/audit',
+      'POST /api/ai/chat',
+      'POST /api/ai/parse-expense',
+      'POST /api/ai/generate-budget-plan',
+      'POST /api/ai/omni'
+    ]
+  });
+});
+
+// 2. Get all persisted user data
+app.get('/api/data', (_req, res) => {
+  try {
+    const db = loadDatabase();
+    res.json({ success: true, data: db });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to read data' });
+  }
+});
+
+// 3. Save / Sync entire user data state
+app.post('/api/data', (req, res) => {
+  try {
+    const { transactions, categories, goals, bills, currency } = req.body;
+    const currentDb = loadDatabase();
+    const updatedDb: DatabaseSchema = {
+      transactions: Array.isArray(transactions) ? transactions : currentDb.transactions,
+      categories: Array.isArray(categories) ? categories : currentDb.categories,
+      goals: Array.isArray(goals) ? goals : currentDb.goals,
+      bills: Array.isArray(bills) ? bills : currentDb.bills,
+      currency: currency || currentDb.currency,
+      updatedAt: new Date().toISOString()
+    };
+    saveDatabase(updatedDb);
+    res.json({ success: true, message: 'Data saved successfully', updatedAt: updatedDb.updatedAt });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to save data' });
+  }
+});
+
+// 4. Add a single transaction
+app.post('/api/transactions', (req, res) => {
+  try {
+    const { transaction } = req.body;
+    if (!transaction || !transaction.amount) {
+      return res.status(400).json({ error: 'Valid transaction object is required' });
+    }
+    const db = loadDatabase();
+    const newTx = {
+      ...transaction,
+      id: transaction.id || `tx_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`
+    };
+    db.transactions.unshift(newTx);
+    db.updatedAt = new Date().toISOString();
+    saveDatabase(db);
+    res.json({ success: true, transaction: newTx, totalCount: db.transactions.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to add transaction' });
+  }
+});
+
+// 5. Delete a transaction by ID
+app.delete('/api/transactions/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = loadDatabase();
+    const initialLen = db.transactions.length;
+    db.transactions = db.transactions.filter((t: any) => t.id !== id);
+    db.updatedAt = new Date().toISOString();
+    saveDatabase(db);
+    res.json({
+      success: true,
+      deletedId: id,
+      deletedCount: initialLen - db.transactions.length
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to delete transaction' });
+  }
+});
+
+// 6. Reset database
+app.post('/api/reset-data', (_req, res) => {
+  try {
+    const emptyDb: DatabaseSchema = {
+      transactions: [],
+      categories: [],
+      goals: [],
+      bills: [],
+      currency: 'USD',
+      updatedAt: new Date().toISOString()
+    };
+    saveDatabase(emptyDb);
+    res.json({ success: true, message: 'Database reset successfully' });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to reset database' });
+  }
 });
 
 // -------------------------------------------------------------

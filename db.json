@@ -1,0 +1,17 @@
+{
+  "transactions": [
+    {
+      "id": "tx1",
+      "amount": 50,
+      "description": "Coffee",
+      "type": "expense",
+      "category": "Dining & Cafes",
+      "date": "2026-09-28"
+    }
+  ],
+  "categories": [],
+  "goals": [],
+  "bills": [],
+  "currency": "USD",
+  "updatedAt": "2026-09-28T18:14:31.165Z"
+}

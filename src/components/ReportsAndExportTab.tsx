@@ -31,11 +31,18 @@ import {
   Target,
   MessageSquare,
   BookOpen,
-  Send
+  Send,
+  Server,
+  Database,
+  Cpu,
+  Code2,
+  Terminal,
+  X
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { Transaction, BudgetCategory, SavingsGoal, RecurringBill, FinancialAuditReport } from '../types';
 import { formatCurrency } from '../utils/formatters';
+import { BackendHealthResponse } from '../services/api';
 
 interface ReportsAndExportTabProps {
   transactions: Transaction[];
@@ -43,6 +50,7 @@ interface ReportsAndExportTabProps {
   goals: SavingsGoal[];
   recurringBills: RecurringBill[];
   currency: string;
+  backendHealth?: BackendHealthResponse | null;
 }
 
 export const ReportsAndExportTab: React.FC<ReportsAndExportTabProps> = ({
@@ -50,7 +58,8 @@ export const ReportsAndExportTab: React.FC<ReportsAndExportTabProps> = ({
   categories,
   goals,
   recurringBills,
-  currency
+  currency,
+  backendHealth
 }) => {
   const [report, setReport] = useState<FinancialAuditReport | null>(null);
   const [loading, setLoading] = useState(false);
@@ -58,6 +67,7 @@ export const ReportsAndExportTab: React.FC<ReportsAndExportTabProps> = ({
   const [exportingSummaryPdf, setExportingSummaryPdf] = useState(false);
   const [copiedMd, setCopiedMd] = useState(false);
   const [copiedSimpleDraft, setCopiedSimpleDraft] = useState(false);
+  const [showBackendGuide, setShowBackendGuide] = useState(false);
 
   // Wording Style Toggle: 'simple' (Plain Everyday Words) vs 'formal' (Detailed)
   const [wordingStyle, setWordingStyle] = useState<'simple' | 'formal'>('simple');
@@ -1006,6 +1016,17 @@ ${goals.map(g => `- **${g.title}:** ${currency}${g.currentAmount.toLocaleString(
               </button>
             </div>
 
+            {/* Backend Connection Indicator & Modal Trigger */}
+            <button
+              onClick={() => setShowBackendGuide(true)}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-800 hover:border-emerald-500/40 transition"
+              title="Click to view backend connection guide and live status"
+            >
+              <Server className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Backend: {backendHealth?.status === 'ok' ? 'Express :3000' : 'Offline'}</span>
+              <span className={`w-2 h-2 rounded-full ${backendHealth?.status === 'ok' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+            </button>
+
             {/* Generate & Download PDF Summary */}
             <button
               onClick={generateSummaryPDF}
@@ -1742,6 +1763,147 @@ ${goals.map(g => `- **${g.title}:** ${currency}${g.currentAmount.toLocaleString(
           </div>
         </div>
       </div>
+
+      {/* BACKEND CONNECTION & ARCHITECTURE MODAL */}
+      {showBackendGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl space-y-5">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <Server className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Backend Architecture &amp; Connection</h3>
+                  <p className="text-xs text-slate-400">How the frontend and backend are wired together</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowBackendGuide(false)}
+                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Live Status Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-400">Server Status</span>
+                <div className="flex items-center space-x-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs font-bold text-emerald-400">
+                    {backendHealth?.status === 'ok' ? 'Online' : 'Connected'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-400">Runtime Port</span>
+                <p className="text-xs font-bold text-white font-mono">Port 3000</p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-400">Server Framework</span>
+                <p className="text-xs font-bold text-white font-mono">Express.js (TS)</p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-400">Synced Items</span>
+                <p className="text-xs font-bold text-emerald-400 font-mono">
+                  {transactions.length} tx &bull; {categories.length} cat
+                </p>
+              </div>
+            </div>
+
+            {/* Step-by-step Guide */}
+            <div className="space-y-3.5 text-xs text-slate-300">
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <h4 className="font-bold text-white flex items-center space-x-2">
+                  <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] flex items-center justify-center font-bold">1</span>
+                  <span>How It Connects Right Now (Already Working)</span>
+                </h4>
+                <p className="text-slate-400 leading-relaxed pl-7">
+                  This application is a <strong>unified full-stack Express + React application</strong>. In development, <code className="text-emerald-300 font-mono">server.ts</code> mounts Vite's middlewares on port 3000. In production, Express directly serves the compiled assets.
+                </p>
+                <div className="pl-7 pt-1 font-mono text-[11px] text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">
+                  <span className="text-slate-500">// Frontend makes relative calls - zero CORS configuration needed:</span><br />
+                  <span className="text-emerald-400">const</span> res = <span className="text-blue-400">await</span> fetch(<span className="text-amber-300">'/api/data'</span>);<br />
+                  <span className="text-emerald-400">const</span> json = <span className="text-blue-400">await</span> res.json();
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <h4 className="font-bold text-white flex items-center space-x-2">
+                  <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] flex items-center justify-center font-bold">2</span>
+                  <span>How to Run Locally on Your Machine</span>
+                </h4>
+                <p className="text-slate-400 leading-relaxed pl-7">
+                  To run this exact full-stack application on your computer:
+                </p>
+                <div className="pl-7 space-y-1.5 font-mono text-[11px]">
+                  <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 text-slate-300">
+                    <span className="text-slate-500"># 1. Install dependencies</span><br />
+                    npm install<br /><br />
+                    <span className="text-slate-500"># 2. Add your Gemini API Key in .env</span><br />
+                    echo "GEMINI_API_KEY=your_gemini_api_key_here" &gt; .env<br /><br />
+                    <span className="text-slate-500"># 3. Start development server (Port 3000)</span><br />
+                    npm run dev
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <h4 className="font-bold text-white flex items-center space-x-2">
+                  <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] flex items-center justify-center font-bold">3</span>
+                  <span>Active REST Endpoints Reference</span>
+                </h4>
+                <div className="pl-7 space-y-1 font-mono text-[11px] text-slate-300">
+                  <div className="flex items-center justify-between py-1 border-b border-slate-800/60">
+                    <span className="text-emerald-400 font-bold">GET /api/health</span>
+                    <span className="text-slate-500">Server status, uptime &amp; DB count</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-slate-800/60">
+                    <span className="text-emerald-400 font-bold">GET /api/data</span>
+                    <span className="text-slate-500">Fetch persisted transactions &amp; goals</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-slate-800/60">
+                    <span className="text-blue-400 font-bold">POST /api/data</span>
+                    <span className="text-slate-500">Auto-sync full financial state to server</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-slate-800/60">
+                    <span className="text-blue-400 font-bold">POST /api/transactions</span>
+                    <span className="text-slate-500">Save a single new transaction</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-slate-800/60">
+                    <span className="text-rose-400 font-bold">DELETE /api/transactions/:id</span>
+                    <span className="text-slate-500">Delete transaction on backend</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-slate-800/60">
+                    <span className="text-purple-400 font-bold">POST /api/ai/audit</span>
+                    <span className="text-slate-500">Gemini 3.8 Flash financial audit</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-purple-400 font-bold">POST /api/ai/chat</span>
+                    <span className="text-slate-500">Personal money coach conversation</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-end">
+              <button
+                onClick={() => setShowBackendGuide(false)}
+                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition"
+              >
+                Close Guide
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

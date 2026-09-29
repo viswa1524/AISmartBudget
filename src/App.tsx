@@ -13,6 +13,12 @@ import { TransactionModal } from './components/TransactionModal';
 import { SmartReceiptModal } from './components/SmartReceiptModal';
 import { SmartBudgetModal } from './components/SmartBudgetModal';
 import { CurrencyModal } from './components/CurrencyModal';
+import { 
+  fetchBackendData, 
+  syncBackendData, 
+  checkBackendHealth,
+  BackendHealthResponse 
+} from './services/api';
 
 import { 
   Transaction, 
@@ -82,6 +88,56 @@ export function App() {
   useEffect(() => {
     localStorage.setItem('aisb_bills', JSON.stringify(bills));
   }, [bills]);
+
+  // Backend Health and Cloud Sync Layer
+  const [backendHealth, setBackendHealth] = useState<BackendHealthResponse | null>(null);
+
+  // 1. Initial Load: Fetch from Backend Database or initialize it
+  useEffect(() => {
+    let isMounted = true;
+    async function initBackendConnection() {
+      const health = await checkBackendHealth();
+      if (!isMounted) return;
+      setBackendHealth(health);
+
+      if (health) {
+        const remoteData = await fetchBackendData();
+        if (remoteData && remoteData.transactions && remoteData.transactions.length > 0) {
+          setTransactions(remoteData.transactions);
+          if (remoteData.categories && remoteData.categories.length > 0) setCategories(remoteData.categories);
+          if (remoteData.goals && remoteData.goals.length > 0) setGoals(remoteData.goals);
+          if (remoteData.bills && remoteData.bills.length > 0) setBills(remoteData.bills);
+          if (remoteData.currency) setCurrency(remoteData.currency);
+        } else {
+          // Initialize server storage with existing initial/local state
+          syncBackendData({
+            transactions,
+            categories,
+            goals,
+            bills,
+            currency
+          });
+        }
+      }
+    }
+
+    initBackendConnection();
+    return () => { isMounted = false; };
+  }, []);
+
+  // 2. Continuous Background Sync with Backend
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      syncBackendData({
+        transactions,
+        categories,
+        goals,
+        bills,
+        currency
+      });
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [transactions, categories, goals, bills, currency]);
 
   // Handlers for Transactions
   const handleAddTransaction = (tx: Omit<Transaction, 'id'>) => {
@@ -288,6 +344,7 @@ export function App() {
             goals={goals}
             recurringBills={bills}
             currency={currency}
+            backendHealth={backendHealth}
           />
         )}
       </main>
