@@ -17,7 +17,7 @@ def home(request: Request):
 @app.post("/plan")
 def plan(request: Request, budget: int = Form(...), goal: str = Form(...)):
     r = client.models.generate_content(
-        model="gemini-3.8-flash",
+        model="gemini-2.5-flash",
         contents=f"Split a budget of {budget} for {goal}"
     )
     return templates.TemplateResponse(

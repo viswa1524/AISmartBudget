@@ -67,71 +67,65 @@ IMPORTANT WRITING STYLE RULES:
 5. Keep explanations short, friendly, direct, and encouraging.
 6. Provide an easy letter grade (A+, A, B, C, D, or F), a score out of 100, 2-3 positive things done well, 1-2 easy things to watch out for, and 3 clear, practical tips to save more money each month.`;
 
-        let responseText: string | null = null;
-        try {
-          const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-              systemInstruction: 'You are a warm, helpful personal money coach. Always explain financial concepts using simple, plain, conversational words that anyone can instantly understand and act upon without confusion.',
-              responseMimeType: 'application/json',
-              responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                  overallScore: { type: Type.NUMBER, description: 'Overall money score from 0 to 100' },
-                  healthGrade: { type: Type.STRING, description: 'Simple grade like A+, A, B, C, D, F' },
-                  summary: { type: Type.STRING, description: 'Executive summary written in simple, plain, friendly language' },
-                  savingsRate: { type: Type.NUMBER, description: 'Percentage of money saved' },
-                  monthlyBurnRate: { type: Type.NUMBER, description: 'Total money spent each month' },
-                  projectedRunwayMonths: { type: Type.NUMBER, description: 'How many months rainy day fund will last' },
-                  keyStrengths: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: '2-4 simple, encouraging things the user is doing right'
-                  },
-                  criticalRisks: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: '1-3 simple money leaks or things to watch out for in plain words'
-                  },
-                  recommendedActions: {
-                    type: Type.ARRAY,
-                    items: {
-                      type: Type.OBJECT,
-                      properties: {
-                        title: { type: Type.STRING, description: 'Short, simple action title in everyday words' },
-                        impact: { type: Type.STRING, description: 'High, Medium, or Low' },
-                        description: { type: Type.STRING, description: 'Simple explanation of how to do it' },
-                        potentialSavings: { type: Type.NUMBER, description: 'Estimated dollars saved per month' }
-                      },
-                      required: ['title', 'impact', 'description', 'potentialSavings']
-                    }
-                  },
-                  budgetAdjustments: {
-                    type: Type.ARRAY,
-                    items: {
-                      type: Type.OBJECT,
-                      properties: {
-                        category: { type: Type.STRING },
-                        currentSpending: { type: Type.NUMBER },
-                        recommendedLimit: { type: Type.NUMBER },
-                        action: { type: Type.STRING, description: 'Simple suggestion for this category' }
-                      },
-                      required: ['category', 'currentSpending', 'recommendedLimit', 'action']
-                    }
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: prompt,
+          config: {
+            systemInstruction: 'You are a warm, helpful personal money coach. Always explain financial concepts using simple, plain, conversational words that anyone can instantly understand and act upon without confusion.',
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                overallScore: { type: Type.NUMBER, description: 'Overall money score from 0 to 100' },
+                healthGrade: { type: Type.STRING, description: 'Simple grade like A+, A, B, C, D, F' },
+                summary: { type: Type.STRING, description: 'Executive summary written in simple, plain, friendly language' },
+                savingsRate: { type: Type.NUMBER, description: 'Percentage of money saved' },
+                monthlyBurnRate: { type: Type.NUMBER, description: 'Total money spent each month' },
+                projectedRunwayMonths: { type: Type.NUMBER, description: 'How many months rainy day fund will last' },
+                keyStrengths: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                  description: '2-4 simple, encouraging things the user is doing right'
+                },
+                criticalRisks: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                  description: '1-3 simple money leaks or things to watch out for in plain words'
+                },
+                recommendedActions: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      title: { type: Type.STRING, description: 'Short, simple action title in everyday words' },
+                      impact: { type: Type.STRING, description: 'High, Medium, or Low' },
+                      description: { type: Type.STRING, description: 'Simple explanation of how to do it' },
+                      potentialSavings: { type: Type.NUMBER, description: 'Estimated dollars saved per month' }
+                    },
+                    required: ['title', 'impact', 'description', 'potentialSavings']
                   }
                 },
-                required: ['overallScore', 'healthGrade', 'summary', 'savingsRate', 'monthlyBurnRate', 'keyStrengths', 'criticalRisks', 'recommendedActions', 'budgetAdjustments']
-              }
+                budgetAdjustments: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      category: { type: Type.STRING },
+                      currentSpending: { type: Type.NUMBER },
+                      recommendedLimit: { type: Type.NUMBER },
+                      action: { type: Type.STRING, description: 'Simple suggestion for this category' }
+                    },
+                    required: ['category', 'currentSpending', 'recommendedLimit', 'action']
+                  }
+                }
+              },
+              required: ['overallScore', 'healthGrade', 'summary', 'savingsRate', 'monthlyBurnRate', 'keyStrengths', 'criticalRisks', 'recommendedActions', 'budgetAdjustments']
             }
-          });
-          if (response?.text) responseText = response.text;
-        } catch (callErr: any) {
-          console.warn('[AISmartBudget] Primary gemini-2.5-flash call hit limit or error, using smart fallback:', callErr?.message);
-        }
+          }
+        });
 
-        if (responseText) {
-          const parsed = JSON.parse(responseText);
+        if (response.text) {
+          const parsed = JSON.parse(response.text);
           return res.json({ success: true, data: parsed, report: parsed, source: 'gemini' });
         }
       } catch (geminiErr: any) {
@@ -246,7 +240,7 @@ Provide practical, empowering, and actionable financial advice. Keep your respon
         ];
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.8-flash',
           contents: contents as any,
           config: {
             systemInstruction: systemPrompt,
@@ -314,7 +308,7 @@ Identify:
 - tags (array of 1-3 lowercase relevant tags)`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.8-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
@@ -480,7 +474,7 @@ Keep the message strictly minimal, concise, and focused only on essential data.
 - For answers: Provide the direct key figures/facts in 1-2 brief sentences without conversational filler, intros, or pleasantries.`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.8-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
