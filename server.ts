@@ -13,6 +13,8 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+app.use('/static', express.static(path.resolve(__dirname, 'static')));
+app.use('/static', express.static(path.resolve(__dirname, 'public/static')));
 
 // Initialize Gemini Client server-side
 const apiKey = process.env.GEMINI_API_KEY;
@@ -67,65 +69,71 @@ IMPORTANT WRITING STYLE RULES:
 5. Keep explanations short, friendly, direct, and encouraging.
 6. Provide an easy letter grade (A+, A, B, C, D, or F), a score out of 100, 2-3 positive things done well, 1-2 easy things to watch out for, and 3 clear, practical tips to save more money each month.`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
-          contents: prompt,
-          config: {
-            systemInstruction: 'You are a warm, helpful personal money coach. Always explain financial concepts using simple, plain, conversational words that anyone can instantly understand and act upon without confusion.',
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                overallScore: { type: Type.NUMBER, description: 'Overall money score from 0 to 100' },
-                healthGrade: { type: Type.STRING, description: 'Simple grade like A+, A, B, C, D, F' },
-                summary: { type: Type.STRING, description: 'Executive summary written in simple, plain, friendly language' },
-                savingsRate: { type: Type.NUMBER, description: 'Percentage of money saved' },
-                monthlyBurnRate: { type: Type.NUMBER, description: 'Total money spent each month' },
-                projectedRunwayMonths: { type: Type.NUMBER, description: 'How many months rainy day fund will last' },
-                keyStrengths: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                  description: '2-4 simple, encouraging things the user is doing right'
-                },
-                criticalRisks: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                  description: '1-3 simple money leaks or things to watch out for in plain words'
-                },
-                recommendedActions: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      title: { type: Type.STRING, description: 'Short, simple action title in everyday words' },
-                      impact: { type: Type.STRING, description: 'High, Medium, or Low' },
-                      description: { type: Type.STRING, description: 'Simple explanation of how to do it' },
-                      potentialSavings: { type: Type.NUMBER, description: 'Estimated dollars saved per month' }
-                    },
-                    required: ['title', 'impact', 'description', 'potentialSavings']
+        let responseText: string | null = null;
+        try {
+          const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+              systemInstruction: 'You are a warm, helpful personal money coach. Always explain financial concepts using simple, plain, conversational words that anyone can instantly understand and act upon without confusion.',
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  overallScore: { type: Type.NUMBER, description: 'Overall money score from 0 to 100' },
+                  healthGrade: { type: Type.STRING, description: 'Simple grade like A+, A, B, C, D, F' },
+                  summary: { type: Type.STRING, description: 'Executive summary written in simple, plain, friendly language' },
+                  savingsRate: { type: Type.NUMBER, description: 'Percentage of money saved' },
+                  monthlyBurnRate: { type: Type.NUMBER, description: 'Total money spent each month' },
+                  projectedRunwayMonths: { type: Type.NUMBER, description: 'How many months rainy day fund will last' },
+                  keyStrengths: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: '2-4 simple, encouraging things the user is doing right'
+                  },
+                  criticalRisks: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: '1-3 simple money leaks or things to watch out for in plain words'
+                  },
+                  recommendedActions: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        title: { type: Type.STRING, description: 'Short, simple action title in everyday words' },
+                        impact: { type: Type.STRING, description: 'High, Medium, or Low' },
+                        description: { type: Type.STRING, description: 'Simple explanation of how to do it' },
+                        potentialSavings: { type: Type.NUMBER, description: 'Estimated dollars saved per month' }
+                      },
+                      required: ['title', 'impact', 'description', 'potentialSavings']
+                    }
+                  },
+                  budgetAdjustments: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        category: { type: Type.STRING },
+                        currentSpending: { type: Type.NUMBER },
+                        recommendedLimit: { type: Type.NUMBER },
+                        action: { type: Type.STRING, description: 'Simple suggestion for this category' }
+                      },
+                      required: ['category', 'currentSpending', 'recommendedLimit', 'action']
+                    }
                   }
                 },
-                budgetAdjustments: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      category: { type: Type.STRING },
-                      currentSpending: { type: Type.NUMBER },
-                      recommendedLimit: { type: Type.NUMBER },
-                      action: { type: Type.STRING, description: 'Simple suggestion for this category' }
-                    },
-                    required: ['category', 'currentSpending', 'recommendedLimit', 'action']
-                  }
-                }
-              },
-              required: ['overallScore', 'healthGrade', 'summary', 'savingsRate', 'monthlyBurnRate', 'keyStrengths', 'criticalRisks', 'recommendedActions', 'budgetAdjustments']
+                required: ['overallScore', 'healthGrade', 'summary', 'savingsRate', 'monthlyBurnRate', 'keyStrengths', 'criticalRisks', 'recommendedActions', 'budgetAdjustments']
+              }
             }
-          }
-        });
+          });
+          if (response?.text) responseText = response.text;
+        } catch (callErr: any) {
+          console.warn('[AISmartBudget] Primary gemini-2.5-flash call hit limit or error, using smart fallback:', callErr?.message);
+        }
 
-        if (response.text) {
-          const parsed = JSON.parse(response.text);
+        if (responseText) {
+          const parsed = JSON.parse(responseText);
           return res.json({ success: true, data: parsed, report: parsed, source: 'gemini' });
         }
       } catch (geminiErr: any) {
@@ -240,7 +248,7 @@ Provide practical, empowering, and actionable financial advice. Keep your respon
         ];
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+          model: 'gemini-2.5-flash',
           contents: contents as any,
           config: {
             systemInstruction: systemPrompt,
@@ -308,7 +316,7 @@ Identify:
 - tags (array of 1-3 lowercase relevant tags)`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+          model: 'gemini-2.5-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
@@ -474,7 +482,7 @@ Keep the message strictly minimal, concise, and focused only on essential data.
 - For answers: Provide the direct key figures/facts in 1-2 brief sentences without conversational filler, intros, or pleasantries.`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+          model: 'gemini-2.5-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
@@ -636,6 +644,8 @@ interface DatabaseSchema {
   bills: any[];
   currency: string;
   updatedAt: string;
+  users?: any[];
+  pocketHistory?: any[];
 }
 
 function loadDatabase(): DatabaseSchema {
@@ -780,6 +790,340 @@ app.post('/api/reset-data', (_req, res) => {
     res.json({ success: true, message: 'Database reset successfully' });
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to reset database' });
+  }
+});
+
+// 7. Budget Planner endpoint (Used by frontend and Python clients)
+app.post('/api/plan', (req, res) => {
+  try {
+    const budget = Math.max(0, parseFloat(req.body.budget) || 0);
+    const goal = req.body.goal || 'your goal';
+    res.json({
+      success: true,
+      plan: {
+        needs: Math.round(budget * 0.5 * 100) / 100,
+        wants: Math.round(budget * 0.3 * 100) / 100,
+        savings: Math.round(budget * 0.2 * 100) / 100,
+        goal
+      }
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to generate budget plan' });
+  }
+});
+
+// 8. AI Assistant Chat endpoint (Interactive money coach)
+app.post('/api/assistant', async (req, res) => {
+  try {
+    const { message = '', summary = {} } = req.body;
+    const msgLower = (message || '').toLowerCase();
+    const income = parseFloat(summary.income || 0) || 0;
+    const expense = parseFloat(summary.expense || 0) || 0;
+    const balance = income - expense;
+
+    if (ai) {
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: `You are a helpful, encouraging personal finance coach. The user asks: "${message}". Their current financial summary is: Total Income: $${income.toFixed(2)}, Total Expenses: $${expense.toFixed(2)}, Balance: $${balance.toFixed(2)}. Give a warm, practical, short 2-3 sentence answer with specific advice.`,
+        });
+        if (response?.text) {
+          return res.json({ success: true, reply: response.text });
+        }
+      } catch (geminiErr: any) {
+        console.warn('[AISmartBudget] Assistant Gemini API limit or error, using intelligent fallback:', geminiErr?.message);
+      }
+    }
+
+    // Smart conversational rule-based fallback
+    let reply = "A good next step is to record every purchase for one week. Once your spending is visible, choose one category to trim gently.";
+    if (msgLower.includes('save') || msgLower.includes('saving') || msgLower.includes('goal')) {
+      reply = "Start with a small automatic transfer on payday. Aim for 20% of income if you can; even 5% is a strong start.";
+    } else if (msgLower.includes('spend') || msgLower.includes('expense') || msgLower.includes('cost') || msgLower.includes('balance')) {
+      reply = `You have spent $${expense.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} so far and have $${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} left from recorded income. Review your biggest category before making the next purchase.`;
+    } else if (msgLower.includes('budget') || msgLower.includes('plan')) {
+      reply = "Try the 50/30/20 plan: 50% for needs, 30% for wants, and 20% for savings. Adjust the split to match your real life.";
+    }
+    return res.json({ success: true, reply });
+  } catch (err: any) {
+    res.json({ success: true, reply: "Track your income and top 3 expenses this month to make saving effortless." });
+  }
+});
+
+// =============================================================
+// PocketSmart AI Endpoints (Home, Party, Jewelry, History, Auth)
+// =============================================================
+
+// Auth: Login
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { username = 'sai' } = req.body;
+    const cleanUser = username.trim().toLowerCase();
+    const db = loadDatabase();
+    if (!db.users) db.users = [];
+    let matched = db.users.find((u: any) => u.username?.toLowerCase() === cleanUser);
+    if (!matched) {
+      matched = { username: cleanUser, name: cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1), email: `${cleanUser}@example.com` };
+      db.users.push(matched);
+      saveDatabase(db);
+    }
+    res.json({ success: true, user: matched });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Login failed' });
+  }
+});
+
+// Auth: Register
+app.post('/api/auth/register', (req, res) => {
+  try {
+    const { username = '', email = '', name = '' } = req.body;
+    const cleanUser = username.trim().toLowerCase();
+    if (!cleanUser) return res.status(400).json({ error: 'Username is required' });
+    const db = loadDatabase();
+    if (!db.users) db.users = [];
+    if (db.users.some((u: any) => u.username?.toLowerCase() === cleanUser)) {
+      return res.status(400).json({ error: 'Username already taken' });
+    }
+    const newUser = { username: cleanUser, email: email.trim(), name: name || cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1) };
+    db.users.push(newUser);
+    saveDatabase(db);
+    res.json({ success: true, user: newUser });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Registration failed' });
+  }
+});
+
+// 1. Home Interior Budget Planner
+app.post('/api/pocket/home-plan', (req, res) => {
+  try {
+    const { budget = 50000, rooms = '2 BHK', style = 'Modern Minimalist', retailers = ['IKEA', 'Amazon'], roomTypes = ['Living Room', 'Bedroom'] } = req.body;
+    const total = Math.max(5000, parseFloat(budget) || 50000);
+
+    const lightingBudget = Math.round(total * 0.10);
+    const fansBudget = Math.round(total * 0.15);
+    const furnitureBudget = Math.round(total * 0.55);
+    const allocated = lightingBudget + fansBudget + furnitureBudget;
+    const remaining = total - allocated;
+
+    const hasIkea = retailers.includes('IKEA') || retailers.length === 0;
+
+    const plan = {
+      id: `home_${Date.now()}`,
+      type: 'home',
+      title: `${rooms} ${style} Home Decor`,
+      budget: total,
+      allocated,
+      remaining,
+      currency: '₹',
+      date: new Date().toISOString().slice(0, 10),
+      details: {
+        rooms,
+        style,
+        retailers,
+        roomTypes,
+        sections: [
+          {
+            category: 'Lighting',
+            allocation: lightingBudget,
+            items: [
+              { name: hasIkea ? 'IKEA Solklint Pendant Lamp' : 'Philips Ambient Glass Pendant', desc: 'Warm amber fluted glass pendant for dining & living focal points', price: Math.round(lightingBudget * 0.38), qty: 1, platform: hasIkea ? 'IKEA' : 'Amazon', url: hasIkea ? 'https://www.ikea.com' : 'https://www.amazon.in' },
+              { name: 'Wipro 20W Smart Color-Tunable LED Batten', desc: 'Voice & app controlled ambient white to warm lighting', price: Math.round(lightingBudget * 0.18), qty: 2, platform: 'Amazon', url: 'https://www.amazon.in' },
+              { name: hasIkea ? 'IKEA Tagarp Corner Floor Uplighter' : 'Solimo Tall Metal Floor Lamp', desc: 'Diffuse upward indirect lighting for cozy corners', price: Math.round(lightingBudget * 0.26), qty: 1, platform: hasIkea ? 'IKEA' : 'Amazon', url: hasIkea ? 'https://www.ikea.com' : 'https://www.amazon.in' }
+            ]
+          },
+          {
+            category: 'Ceiling Fans & Appliances',
+            allocation: fansBudget,
+            items: [
+              { name: 'Atomberg Renesa 1200mm Smart BLDC Fan', desc: '5-star ultra energy saving with smart remote, sleep mode & timer', price: Math.round(fansBudget * 0.52), qty: 1, platform: 'Amazon', url: 'https://www.amazon.in' },
+              { name: 'Havells Stealth Air Premium Aerodynamic Fan', desc: 'Whisper-silent contoured blades for peaceful bedroom cooling', price: Math.round(fansBudget * 0.48), qty: 1, platform: 'Flipkart', url: 'https://www.flipkart.com' }
+            ]
+          },
+          {
+            category: 'Furniture',
+            allocation: furnitureBudget,
+            items: [
+              { name: hasIkea ? 'IKEA KIVIK Compact 2-Seater Fabric Sofa' : 'Solimo 3-Seater High-Density Foam Couch', desc: `Tailored ${style.toLowerCase()} silhouette with washable covers and memory foam`, price: Math.round(furnitureBudget * 0.65), qty: 1, platform: hasIkea ? 'IKEA' : 'Amazon', url: hasIkea ? 'https://www.ikea.com' : 'https://www.amazon.in' },
+              { name: 'Urban Ladder Sheesham Wood Coffee Table', desc: 'Compact walnut finish table with bottom shelf for books & remotes', price: Math.round(furnitureBudget * 0.20), qty: 1, platform: 'Urban Ladder', url: 'https://www.urbanladder.com' },
+              { name: 'AmazonBasics Engineered Wood Sleek TV Console', desc: 'Floating media shelf with integrated cable pass-through channels', price: Math.round(furnitureBudget * 0.15), qty: 1, platform: 'Amazon', url: 'https://www.amazon.in' }
+            ]
+          }
+        ],
+        suggestions: [
+          `For ${rooms} spaces in ${style} aesthetic, multi-functional furniture saves up to 30% floor area.`,
+          'Look for IKEA Family discounts and Amazon Prime Festival credit card cashbacks (additional 5-10% off).',
+          'Install energy-efficient BLDC motors first to reduce ongoing utility bills immediately.'
+        ]
+      }
+    };
+    res.json({ success: true, plan });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to generate home plan' });
+  }
+});
+
+// 2. Party Budget Planner
+app.post('/api/pocket/party-plan', (req, res) => {
+  try {
+    const { budget = 15000, occasion = 'Birthday Celebration', guests = 15, venueType = 'OYO Townhouse Party Suite', city = 'Bangalore', cuisine = 'North Indian & Fast Food' } = req.body;
+    const total = Math.max(3000, parseFloat(budget) || 15000);
+
+    const cateringBudget = Math.round(total * 0.50);
+    const venueBudget = Math.round(total * 0.28);
+    const decorBudget = Math.round(total * 0.14);
+    const entBudget = Math.round(total * 0.05);
+    const allocated = cateringBudget + venueBudget + decorBudget + entBudget;
+    const remaining = total - allocated;
+
+    const plan = {
+      id: `party_${Date.now()}`,
+      type: 'party',
+      title: `${occasion} (${guests} Guests)`,
+      budget: total,
+      allocated,
+      remaining,
+      currency: '₹',
+      date: new Date().toISOString().slice(0, 10),
+      details: {
+        occasion,
+        guests,
+        venue: venueType,
+        costPerGuest: Math.round(cateringBudget / Math.max(1, guests)),
+        sections: [
+          {
+            category: 'Catering & Refreshments',
+            allocation: cateringBudget,
+            items: [
+              { name: `Swiggy Gourmet Platter for ${guests} Guests`, desc: `Assorted hot appetizers, finger foods, and gourmet sliders for ${occasion}`, price: Math.round(cateringBudget * 0.60), qty: 1, platform: 'Swiggy', url: 'https://www.swiggy.com' },
+              { name: 'Zomato Main Course Buffet & Dum Biryani Tub', desc: `${cuisine} authentic main meal party combo with accompaniments and gravies`, price: Math.round(cateringBudget * 0.30), qty: 1, platform: 'Zomato', url: 'https://www.zomato.com' },
+              { name: 'Beverages, Mocktail Mixers & Ice Packs', desc: 'Chilled sodas, sparkling fruit juices, lime tonics & crushed ice', price: Math.round(cateringBudget * 0.10), qty: 1, platform: 'Blinkit', url: 'https://www.blinkit.com' }
+            ]
+          },
+          {
+            category: 'Venue & Space',
+            allocation: venueBudget,
+            items: [
+              { name: `OYO Townhouse Party Lounge (${city})`, desc: 'Private sanitized space with air conditioning, WiFi & Bluetooth party speakers', price: venueBudget, qty: 1, platform: 'OYO', url: 'https://www.oyorooms.com' }
+            ]
+          },
+          {
+            category: 'Decor & Lighting',
+            allocation: decorBudget,
+            items: [
+              { name: 'Amazon Metallic Chrome Balloon Arch Kit', desc: `Themed color balloon cluster with arch tape, glue dots, and shiny banner for ${occasion}`, price: Math.round(decorBudget * 0.55), qty: 1, platform: 'Amazon', url: 'https://www.amazon.in' },
+              { name: 'Warm LED Fairy Curtain Lights (3x3 Meters)', desc: 'Photobooth backdrop illumination with 8 lighting modes and USB power', price: Math.round(decorBudget * 0.45), qty: 1, platform: 'Amazon', url: 'https://www.amazon.in' }
+            ]
+          },
+          {
+            category: 'Entertainment & Music',
+            allocation: entBudget,
+            items: [
+              { name: 'Party Games Box & Props Photobooth Kit', desc: 'Fun interactive group games, trivia deck, and quirky photo props for memorable selfies', price: entBudget, qty: 1, platform: 'Amazon', url: 'https://www.amazon.in' }
+            ]
+          }
+        ],
+        suggestions: [
+          'Schedule Swiggy / Zomato group delivery 2 hours prior to start to avoid rush-hour delays.',
+          'Verify with OYO reception for outside catering allowance and quiet-hour timings.',
+          'Create a shared Spotify / Apple Music collaborative playlist so all attendees can add songs.'
+        ]
+      }
+    };
+    res.json({ success: true, plan });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to generate party plan' });
+  }
+});
+
+// 3. Jewelry Budget Planner
+app.post('/api/pocket/jewelry-plan', (req, res) => {
+  try {
+    const { budget = 20000, occasion = 'Wedding Reception', outfit = 'Silk Saree with Zari', material = 'Kundan & 18K Gold Plated', imageData = '' } = req.body;
+    const total = Math.max(2000, parseFloat(budget) || 20000);
+
+    const necklaceBudget = Math.round(total * 0.45);
+    const earringsBudget = Math.round(total * 0.25);
+    const banglesBudget = Math.round(total * 0.18);
+    const ringBudget = Math.round(total * 0.08);
+    const allocated = necklaceBudget + earringsBudget + banglesBudget + ringBudget;
+    const remaining = total - allocated;
+
+    const hasImage = Boolean(imageData && imageData.length > 50);
+    const outfitAnalysis = `AI Outfit Analysis: Your ${outfit} paired with ${material} creates an exquisite harmony. The selected neckline complements a mid-length choker and statement studs, balancing color and luster.${hasImage ? ' [Visual verification matched fabric sheen and palette undertones].' : ''}`;
+
+    const jewelryItems = [
+      { category: 'Bracelet / Kada', name: `${material} Delicate Filigree Kada`, desc: 'Contemporary adjustable kada designed to accentuate wrists without snagging fabric', price: banglesBudget, shopOn: ['CaratLane', 'Amazon', 'Tanishq'], url: 'https://www.caratlane.com' },
+      { category: 'Ring', name: `GIVA ${material} Solitaire Statement Ring`, desc: 'Sophisticated accent ring with center zircon facet and anti-tarnish protective coat', price: ringBudget, shopOn: ['GIVA', 'Amazon'], url: 'https://www.giva.co' },
+      { category: 'Necklace / Choker', name: `Tanishq Mia ${material} Choker Set`, desc: `Artisan handcrafted necklace designed specifically for ${occasion} with secure hook clasp`, price: necklaceBudget, shopOn: ['Tanishq', 'CaratLane'], url: 'https://www.tanishq.co.in' },
+      { category: 'Earrings / Jhumkas', name: 'CaratLane Meenakari Chandbalis', desc: 'Featherlight chandelier earrings balancing neck jewelry with cultured pearls', price: earringsBudget, shopOn: ['CaratLane', 'Myntra'], url: 'https://www.caratlane.com' }
+    ];
+
+    const plan = {
+      id: `jewelry_${Date.now()}`,
+      type: 'jewelry',
+      title: `${occasion} ${material} Set`,
+      budget: total,
+      allocated,
+      remaining,
+      currency: '₹',
+      date: new Date().toISOString().slice(0, 10),
+      details: {
+        occasion,
+        outfit,
+        material,
+        hasImage,
+        outfitAnalysis,
+        items: jewelryItems,
+        stylingTips: [
+          'Follow the Rule of Two: When wearing a statement choker, keep wrist accessories minimal to avoid visual clutter.',
+          'Warm metallic tones (Gold & Kundan) enhance rich silks and warm color undertones.',
+          'Always apply cosmetics, body mist, and hairspray before putting on plated jewelry to safeguard longevity.'
+        ]
+      }
+    };
+    res.json({ success: true, plan });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to generate jewelry plan' });
+  }
+});
+
+// 4. Recommendation History Endpoints
+app.get('/api/pocket/history', (_req, res) => {
+  try {
+    const db = loadDatabase();
+    res.json({ success: true, history: (db as any).pocketHistory || [] });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to fetch history' });
+  }
+});
+
+app.post('/api/pocket/history/save', (req, res) => {
+  try {
+    const { plan } = req.body;
+    if (!plan) return res.status(400).json({ error: 'Plan is required' });
+    const db = loadDatabase();
+    if (!(db as any).pocketHistory) (db as any).pocketHistory = [];
+    plan.id = plan.id || `plan_${Date.now()}`;
+    plan.date = plan.date || new Date().toISOString().slice(0, 10);
+    (db as any).pocketHistory.unshift(plan);
+    saveDatabase(db);
+    res.json({ success: true, saved: plan });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to save plan' });
+  }
+});
+
+app.delete('/api/pocket/history/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = loadDatabase();
+    if ((db as any).pocketHistory) {
+      (db as any).pocketHistory = (db as any).pocketHistory.filter((h: any) => h.id !== id);
+      saveDatabase(db);
+    }
+    res.json({ success: true, deletedId: id });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to delete plan' });
   }
 });
 

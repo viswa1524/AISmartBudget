@@ -3,49 +3,944 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AI-powered budget management and financial assistant">
-  <title>AISmartBudget — Money, made clear</title>
+  <meta name="description" content="PocketSmart AI - AI-Powered Budget Planning for Everyday Needs. Optimize home decor with IKEA/Amazon, parties with Swiggy/Zomato/OYO, and jewelry tailored to your outfit.">
+  <title>PocketSmart AI: Your Smart Budget Planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <a class="brand" href="#dashboard"><span class="brand-mark">✦</span><span>Smart<span>Budget</span></span></a>
-      <nav aria-label="Main navigation">
-        <a class="nav-link active" href="#dashboard" data-view="dashboard"><span>⌂</span> Dashboard</a>
-        <a class="nav-link" href="#transactions" data-view="transactions"><span>↕</span> Transactions</a>
-        <a class="nav-link" href="#planner" data-view="planner"><span>◒</span> Budget planner</a>
-        <a class="nav-link" href="#assistant" data-view="assistant"><span>✧</span> AI assistant</a>
-      </nav>
-      <div class="sidebar-bottom"><div class="tip-card"><span class="tip-icon">☀</span><strong>Small steps add up</strong><p>Track one expense today. Your future self will thank you.</p></div><button class="ghost-button" id="resetData">↺ Reset demo data</button></div>
-    </aside>
 
-    <main class="content">
-      <header class="topbar"><div><p class="eyebrow">Tuesday, September 30, 2026</p><h1 id="pageTitle">Good morning, Viswa <span>✦</span></h1></div><div class="top-actions"><button class="icon-button" title="Notifications">♢<i></i></button><div class="avatar">V</div></div></header>
-
-      <section id="dashboard" class="view active-view">
-        <div class="hero-row"><div><h2>Your money at a glance</h2><p class="muted">Here is how your finances are looking this month.</p></div><button class="primary-button" id="addExpenseBtn">＋ Add transaction</button></div>
-        <div class="stat-grid">
-          <article class="stat-card income"><div class="stat-label"><span class="dot"></span> Money in <span class="card-menu">•••</span></div><strong id="incomeTotal">$0.00</strong><small>↑ <b>Income received</b> this month</small></article>
-          <article class="stat-card expense"><div class="stat-label"><span class="dot"></span> Money out <span class="card-menu">•••</span></div><strong id="expenseTotal">$0.00</strong><small>↓ <b>Spent</b> this month</small></article>
-          <article class="stat-card balance"><div class="stat-label"><span class="dot"></span> Left to spend <span class="card-menu">•••</span></div><strong id="balanceTotal">$0.00</strong><small id="savingsLabel">Your monthly balance</small></article>
+  <!-- Top Navigation Header -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#home" class="brand-logo" data-nav="home">
+        <div class="logo-icon">✦</div>
+        <div class="logo-text">
+          <span class="logo-main">Pocket<span>Smart</span></span>
+          <span class="logo-sub">AI-POWERED BUDGET PLANNING</span>
         </div>
-        <div class="dashboard-grid"><article class="panel spending-panel"><div class="panel-heading"><div><h3>Spending overview</h3><p class="muted">Your expenses by category</p></div><select id="periodSelect"><option>This month</option><option>Last month</option></select></div><div class="chart-wrap"><div class="donut" id="donut"><div class="donut-center"><strong id="donutTotal">$0</strong><span>Total spent</span></div></div><div class="legend" id="legend"></div></div></article><article class="panel health-panel"><div class="panel-heading"><div><h3>Money health</h3><p class="muted">A simple view of your progress</p></div><span class="health-badge">Good</span></div><div class="health-score"><div class="score-ring"><strong id="healthScore">0</strong><span>/ 100</span></div><div><strong id="healthMessage">Add income and expenses</strong><p class="muted">Keep tracking to unlock helpful insights.</p></div></div><div class="progress-row"><span>Savings rate</span><b id="savingsRate">0%</b></div><div class="progress"><i id="savingsProgress"></i></div><div class="coach-note"><span>✧</span><p><b>Smart tip</b><br>Try to keep at least 20% of your income for future goals.</p></div></article></div>
-        <article class="panel transactions-panel"><div class="panel-heading"><div><h3>Recent transactions</h3><p class="muted">Your latest money activity</p></div><a href="#transactions" class="text-button">View all →</a></div><div class="table-wrap"><table><thead><tr><th>DESCRIPTION</th><th>CATEGORY</th><th>DATE</th><th class="align-right">AMOUNT</th></tr></thead><tbody id="recentTransactions"></tbody></table></div></article>
-      </section>
+      </a>
 
-      <section id="transactions" class="view"><div class="hero-row"><div><h2>Transactions</h2><p class="muted">Every dollar, accounted for.</p></div><button class="primary-button" id="addExpenseBtn2">＋ Add transaction</button></div><article class="panel"><div class="table-wrap"><table><thead><tr><th>DESCRIPTION</th><th>CATEGORY</th><th>DATE</th><th>TYPE</th><th class="align-right">AMOUNT</th><th></th></tr></thead><tbody id="allTransactions"></tbody></table></div></article></section>
+      <!-- Desktop Nav Links -->
+      <nav class="nav-menu" id="navMenu">
+        <a href="#home" class="nav-item active" data-nav="home">Home</a>
+        <a href="#dashboard" class="nav-item" data-nav="dashboard">Dashboard</a>
+        <a href="#home-planner" class="nav-item" data-nav="home-planner">Home Interior</a>
+        <a href="#party-planner" class="nav-item" data-nav="party-planner">Party Planner</a>
+        <a href="#jewelry-planner" class="nav-item" data-nav="jewelry-planner">Jewelry Planner</a>
+        <a href="#history" class="nav-item" data-nav="history">History</a>
+        <a href="#testimonials" class="nav-item" data-nav="testimonials">Testimonials</a>
+      </nav>
 
-      <section id="planner" class="view"><div class="hero-row"><div><h2>Budget planner</h2><p class="muted">Build a practical plan for any goal.</p></div></div><div class="planner-grid"><article class="panel planner-form"><h3>Plan your budget</h3><p class="muted">Use the 50/30/20 rule as a starting point.</p><label>Monthly budget<input id="planBudget" type="number" value="3000" min="1"></label><label>What are you planning for?<input id="planGoal" value="A calmer month"></label><button class="primary-button full" id="planBtn">Create my plan ✦</button></article><article class="panel result-panel" id="planResult"><div class="empty-state"><span>✦</span><h3>Your plan will appear here</h3><p class="muted">Enter a budget and goal to get a simple breakdown.</p></div></article></div></section>
+      <!-- User Auth State -->
+      <div class="nav-auth" id="navAuth">
+        <div class="user-pill hidden" id="userPill">
+          <div class="user-avatar" id="navAvatar">S</div>
+          <span class="user-greeting" id="navUserGreeting">Welcome, sai!</span>
+          <button class="btn-logout" id="logoutBtn" title="Sign Out">Sign Out</button>
+        </div>
+        <div class="auth-buttons" id="authButtons">
+          <a href="#login" class="btn-secondary sm" data-nav="login">Sign In</a>
+          <a href="#register" class="btn-primary sm" data-nav="register">Register</a>
+        </div>
+      </div>
+    </div>
+  </header>
 
-      <section id="assistant" class="view"><div class="hero-row"><div><h2>AI assistant</h2><p class="muted">Ask a question about your money. Get a clear answer.</p></div></div><article class="panel chat-panel"><div class="chat-messages" id="chatMessages"><div class="message assistant"><span>✦</span><p>Hi! I’m your money coach. Ask me how to save, understand your spending, or plan a goal.</p></div></div><form class="chat-form" id="chatForm"><input id="chatInput" placeholder="e.g. How can I save more this month?" autocomplete="off"><button class="primary-button">Send</button></form></article></section>
-    </main>
-  </div>
+  <!-- Main View Container -->
+  <main class="main-wrapper">
 
-  <dialog id="transactionDialog"><form method="dialog" class="modal-form" id="transactionForm"><button class="close-button" value="cancel">×</button><h2>Add transaction</h2><p class="muted">Keep your money picture up to date.</p><label>Description<input name="description" required placeholder="Coffee with friends"></label><div class="form-row"><label>Amount<input name="amount" type="number" min="0.01" step="0.01" required placeholder="25.00"></label><label>Type<select name="type"><option value="expense">Expense</option><option value="income">Income</option></select></label></div><label>Category<select name="category"><option>Dining & Cafes</option><option>Groceries</option><option>Housing & Rent</option><option>Transportation</option><option>Utilities & Bills</option><option>Shopping</option><option>Entertainment & Tech</option><option>Health & Fitness</option><option>Income</option></select></label><label>Date<input name="date" type="date" required></label><button class="primary-button full" value="default">Save transaction</button></form></dialog>
+    <!-- ========================================================
+         VIEW 1: HOME LANDING PAGE
+         ======================================================== -->
+    <section id="view-home" class="view-panel active">
+      <!-- Hero Banner -->
+      <div class="hero-banner">
+        <div class="hero-content">
+          <div class="hero-badge">✦ AI-Powered Multi-Platform Budget Optimizer</div>
+          <h1 class="hero-title">PocketSmart</h1>
+          <p class="hero-tagline">AI-Powered Budget Planning for Everyday Needs</p>
+          <p class="hero-description">
+            Conduct end-to-end smart budget planning tailored to your exact budget and preferences. Discover home decor from <strong>IKEA & Amazon</strong>, party packages with catering from <strong>Swiggy & Zomato</strong>, venues from <strong>OYO</strong>, and jewelry matched with your outfit and occasion.
+          </p>
+          <div class="hero-actions">
+            <a href="#home-planner" class="btn-primary" data-nav="home-planner">Start Home Decor Plan</a>
+            <a href="#party-planner" class="btn-primary party-btn" data-nav="party-planner">Plan a Party Package</a>
+            <a href="#jewelry-planner" class="btn-primary jewelry-btn" data-nav="jewelry-planner">Match Outfit Jewelry</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Planners Section -->
+      <div class="container section-pad">
+        <div class="section-header text-center">
+          <h2 class="section-title">Our Smart Budget Planners</h2>
+          <p class="section-subtitle">Choose a dedicated planner module designed with real-time merchant pricing and smart itemized allocations.</p>
+        </div>
+
+        <div class="planner-cards-grid">
+          <!-- Card 1: Home Interior -->
+          <div class="planner-card">
+            <div class="planner-card-badge home">Home Decor</div>
+            <div class="planner-icon home">🏠</div>
+            <h3 class="planner-card-title">Home Interior Budget Planner</h3>
+            <p class="planner-card-desc">
+              Input room count, preferred design aesthetic (Modern, Minimalist, Traditional), and total budget to receive itemized furniture, lighting, and appliances from IKEA, Amazon, and Pepperfry.
+            </p>
+            <div class="merchant-tags">
+              <span class="merchant-tag ikea">IKEA</span>
+              <span class="merchant-tag amazon">Amazon</span>
+              <span class="merchant-tag pepperfry">Pepperfry</span>
+              <span class="merchant-tag urbanladder">Urban Ladder</span>
+            </div>
+            <a href="#home-planner" class="btn-card" data-nav="home-planner">Open Home Planner →</a>
+          </div>
+
+          <!-- Card 2: Party Planner -->
+          <div class="planner-card highlight">
+            <div class="planner-card-badge party">Party &amp; Events</div>
+            <div class="planner-icon party">🎉</div>
+            <h3 class="planner-card-title">Party Budget Planner</h3>
+            <p class="planner-card-desc">
+              Organize birthdays, anniversaries, and house parties effortlessly. Curates food platters from Swiggy & Zomato, verified party venues from OYO, and party decorations within your guest count.
+            </p>
+            <div class="merchant-tags">
+              <span class="merchant-tag swiggy">Swiggy</span>
+              <span class="merchant-tag zomato">Zomato</span>
+              <span class="merchant-tag oyo">OYO</span>
+              <span class="merchant-tag amazon">Amazon</span>
+            </div>
+            <a href="#party-planner" class="btn-card" data-nav="party-planner">Open Party Planner →</a>
+          </div>
+
+          <!-- Card 3: Jewelry Planner -->
+          <div class="planner-card">
+            <div class="planner-card-badge jewelry">Style &amp; Fashion</div>
+            <div class="planner-icon jewelry">💍</div>
+            <h3 class="planner-card-title">Jewelry Budget Planner</h3>
+            <p class="planner-card-desc">
+              Receive personalized jewelry suggestions matching your outfit style, color palette, neckline, and occasion. Features optional outfit image upload for visual AI styling analysis.
+            </p>
+            <div class="merchant-tags">
+              <span class="merchant-tag tanishq">Tanishq</span>
+              <span class="merchant-tag caratlane">CaratLane</span>
+              <span class="merchant-tag giva">GIVA</span>
+              <span class="merchant-tag amazon">Amazon</span>
+            </div>
+            <a href="#jewelry-planner" class="btn-card" data-nav="jewelry-planner">Open Jewelry Planner →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- How It Works -->
+      <div class="how-it-works-bg">
+        <div class="container section-pad">
+          <div class="section-header text-center">
+            <h2 class="section-title">How PocketSmart Works</h2>
+            <p class="section-subtitle">Three streamlined steps from budget input to shoppable merchant recommendations.</p>
+          </div>
+
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-number">01</div>
+              <h4 class="step-title">Specify Budget &amp; Style</h4>
+              <p class="step-desc">Enter your total budget (₹) and specify your exact preferences—such as room type, guest count, or outfit photos.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-number">02</div>
+              <h4 class="step-title">AI Multi-Platform Allocation</h4>
+              <p class="step-desc">Our smart engine splits the budget across categories and pairs high-rated items from top merchant platforms.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-number">03</div>
+              <h4 class="step-title">Shop Direct with Exact Pricing</h4>
+              <p class="step-desc">Review your itemized plan with exact price breakdowns, remaining savings buffer, and direct shopping store links.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimonials on Home -->
+      <div class="container section-pad">
+        <div class="section-header text-center">
+          <h2 class="section-title">What Our Users Say</h2>
+          <p class="section-subtitle">Real user reviews and success stories demonstrating PocketSmart AI's planning precision.</p>
+        </div>
+
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">
+              "PocketSmart saved me so much time! I furnished my entire 2 BHK living room within ₹50,000 using the IKEA & Amazon combination. The itemized lighting and BLDC fan recommendations were spot on."
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">P</div>
+              <div>
+                <strong class="author-name">Priya S.</strong>
+                <span class="author-meta">Home Decor Planner User · Bangalore</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">
+              "Planned my brother's 25th birthday party for 15 friends under ₹15,000! The Swiggy gourmet combo and OYO Townhouse booking suggestions fit our budget with ₹800 left over as savings."
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">R</div>
+              <div>
+                <strong class="author-name">Rahul M.</strong>
+                <span class="author-meta">Party Budget Planner User · Mumbai</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">
+              "The jewelry recommendation tool matched my navy blue silk saree with the perfect Tanishq Mia kundan choker and CaratLane earrings. Uploading my outfit photo made the color analysis super accurate!"
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">A</div>
+              <div>
+                <strong class="author-name">Ananya K.</strong>
+                <span class="author-meta">Jewelry Planner User · Hyderabad</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Box -->
+        <div class="cta-box">
+          <h3 class="cta-title">Ready to Optimize Your Budget?</h3>
+          <p class="cta-desc">Join thousands of smart budget planners making every rupee work harder with AI precision.</p>
+          <div class="cta-buttons">
+            <a href="#register" class="btn-primary" data-nav="register">Create Account</a>
+            <a href="#login" class="btn-secondary" data-nav="login">Sign In</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 2: USER DASHBOARD
+         ======================================================== -->
+    <section id="view-dashboard" class="view-panel">
+      <div class="container section-pad">
+        <div class="dashboard-header-card">
+          <div class="dash-user-row">
+            <div class="dash-avatar" id="dashAvatar">S</div>
+            <div>
+              <h1 class="dash-welcome" id="dashWelcome">Welcome, sai!</h1>
+              <p class="dash-subtitle">Manage your personalized budget plans, view recent recommendations, and track savings.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stat-cards-grid">
+          <div class="stat-box">
+            <div class="stat-box-label">Saved Plans</div>
+            <div class="stat-box-val" id="statPlansCount">3</div>
+            <div class="stat-box-sub">Active recommendation plans</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-label">Total Planned Budget</div>
+            <div class="stat-box-val text-primary" id="statTotalBudget">₹85,000</div>
+            <div class="stat-box-sub">Across Home, Party &amp; Jewelry</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-label">Total Preserved Savings</div>
+            <div class="stat-box-val text-success" id="statTotalSavings">₹3,800</div>
+            <div class="stat-box-sub">Under-budget balance retained</div>
+          </div>
+        </div>
+
+        <!-- Launch Planners Row -->
+        <div class="section-subheading">Launch A Smart Planner</div>
+        <div class="quick-launch-grid">
+          <div class="quick-launch-item" onclick="navigateTo('home-planner')">
+            <div class="launch-icon home">🏠</div>
+            <div>
+              <strong>Home Interior Planner</strong>
+              <p>IKEA, Amazon, Urban Ladder decor</p>
+            </div>
+            <span class="launch-arrow">→</span>
+          </div>
+
+          <div class="quick-launch-item" onclick="navigateTo('party-planner')">
+            <div class="launch-icon party">🎉</div>
+            <div>
+              <strong>Party Budget Planner</strong>
+              <p>Swiggy, Zomato, OYO venues &amp; decor</p>
+            </div>
+            <span class="launch-arrow">→</span>
+          </div>
+
+          <div class="quick-launch-item" onclick="navigateTo('jewelry-planner')">
+            <div class="launch-icon jewelry">💍</div>
+            <div>
+              <strong>Jewelry Budget Planner</strong>
+              <p>Tanishq, CaratLane &amp; outfit styling</p>
+            </div>
+            <span class="launch-arrow">→</span>
+          </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="content-panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">Recent Activity &amp; Saved Recommendations</h3>
+              <p class="panel-subtitle">Access, review, or re-run your previous budget allocations.</p>
+            </div>
+            <a href="#history" class="btn-text" data-nav="history">View Complete History →</a>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>PLAN TITLE</th>
+                  <th>TYPE</th>
+                  <th>TOTAL BUDGET</th>
+                  <th>ALLOCATED</th>
+                  <th>DATE</th>
+                  <th class="text-right">ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="dashHistoryTable">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 3: HOME INTERIOR BUDGET PLANNER
+         ======================================================== -->
+    <section id="view-home-planner" class="view-panel">
+      <div class="planner-page-header">
+        <div class="container">
+          <span class="page-tag home">Home Decor Planner</span>
+          <h1 class="page-heading">Home Interior Budget Planner</h1>
+          <p class="page-subheading">Lets users input home decor preferences and budget to get tailored suggestions from IKEA, Amazon, Pepperfry, and more.</p>
+        </div>
+      </div>
+
+      <div class="container section-pad">
+        <div class="form-result-layout">
+          <!-- Left: Input Form Card -->
+          <div class="form-card">
+            <h3 class="form-card-title">1. Budget &amp; Room Setup</h3>
+
+            <form id="homePlannerForm">
+              <!-- Budget -->
+              <div class="input-field">
+                <label for="homeBudget">Total Budget (₹) *</label>
+                <div class="input-with-prefix">
+                  <span class="prefix">₹</span>
+                  <input type="number" id="homeBudget" required min="5000" step="500" value="50000" placeholder="e.g. 50000">
+                </div>
+                <small class="helper-text">Recommended: ₹25,000 – ₹2,50,000 for realistic setups</small>
+              </div>
+
+              <!-- Rooms & Style -->
+              <div class="form-row-2">
+                <div class="input-field">
+                  <label for="homeRooms">Number of Rooms</label>
+                  <select id="homeRooms">
+                    <option value="1 BHK">1 BHK Apartment</option>
+                    <option value="2 BHK" selected>2 BHK Apartment</option>
+                    <option value="3 BHK">3 BHK Apartment</option>
+                    <option value="Studio">Studio Space</option>
+                    <option value="Independent Villa">Independent Villa</option>
+                  </select>
+                </div>
+
+                <div class="input-field">
+                  <label for="homeStyle">Preferred Style</label>
+                  <select id="homeStyle">
+                    <option value="Modern Minimalist" selected>Modern Minimalist</option>
+                    <option value="Contemporary Scandinavian">Contemporary Scandinavian</option>
+                    <option value="Traditional Indian Elegance">Traditional Indian Elegance</option>
+                    <option value="Bohemian Chic">Bohemian Chic</option>
+                    <option value="Industrial Raw">Industrial Raw</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Room Types Checkboxes -->
+              <div class="input-field">
+                <label>Room Types to Focus On</label>
+                <div class="checkbox-pills">
+                  <label class="check-pill"><input type="checkbox" name="homeRoomType" value="Living Room" checked> <span>Living Room</span></label>
+                  <label class="check-pill"><input type="checkbox" name="homeRoomType" value="Master Bedroom" checked> <span>Master Bedroom</span></label>
+                  <label class="check-pill"><input type="checkbox" name="homeRoomType" value="Dining Area" checked> <span>Dining Area</span></label>
+                  <label class="check-pill"><input type="checkbox" name="homeRoomType" value="Balcony"> <span>Balcony</span></label>
+                  <label class="check-pill"><input type="checkbox" name="homeRoomType" value="Home Office"> <span>Home Office</span></label>
+                </div>
+              </div>
+
+              <!-- Retailers to Include -->
+              <div class="input-field">
+                <label>Retailers to Include</label>
+                <div class="checkbox-pills">
+                  <label class="check-pill"><input type="checkbox" name="homeRetailer" value="IKEA" checked> <span>IKEA</span></label>
+                  <label class="check-pill"><input type="checkbox" name="homeRetailer" value="Amazon" checked> <span>Amazon</span></label>
+                  <label class="check-pill"><input type="checkbox" name="homeRetailer" value="Pepperfry" checked> <span>Pepperfry</span></label>
+                  <label class="check-pill"><input type="checkbox" name="homeRetailer" value="Urban Ladder" checked> <span>Urban Ladder</span></label>
+                  <label class="check-pill"><input type="checkbox" name="homeRetailer" value="Flipkart"> <span>Flipkart</span></label>
+                </div>
+              </div>
+
+              <!-- Additional Notes -->
+              <div class="input-field">
+                <label for="homeNotes">Additional Specific Requirements (Optional)</label>
+                <textarea id="homeNotes" rows="2" placeholder="e.g. Prefer neutral earthy colors, scratch-resistant fabric, energy-efficient appliances..."></textarea>
+              </div>
+
+              <button type="submit" class="btn-primary full-width" id="btnGenHome">
+                <span>✦ Generate Recommendations</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Right: Generated Recommendations -->
+          <div class="result-card" id="homeResultContainer">
+            <div class="result-placeholder" id="homePlaceholder">
+              <div class="placeholder-icon">🏠</div>
+              <h3>Your Personalized Budget Plan</h3>
+              <p>Configure your preferences and click "Generate Recommendations" to calculate itemized suggestions from IKEA, Amazon, and Pepperfry.</p>
+            </div>
+
+            <!-- Dynamic Result Area -->
+            <div class="result-content hidden" id="homeResultContent">
+              <!-- Result Content Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 4: PARTY BUDGET PLANNER
+         ======================================================== -->
+    <section id="view-party-planner" class="view-panel">
+      <div class="planner-page-header party-theme">
+        <div class="container">
+          <span class="page-tag party">Party &amp; Events</span>
+          <h1 class="page-heading">Party Budget Planner</h1>
+          <p class="page-subheading">Helps users plan events by suggesting venues (OYO), food (Swiggy/Zomato), and decorations based on budget and guest count.</p>
+        </div>
+      </div>
+
+      <div class="container section-pad">
+        <div class="form-result-layout">
+          <!-- Form -->
+          <div class="form-card">
+            <h3 class="form-card-title">1. Event Information &amp; Venue</h3>
+
+            <form id="partyPlannerForm">
+              <div class="input-field">
+                <label for="partyBudget">Total Event Budget (₹) *</label>
+                <div class="input-with-prefix">
+                  <span class="prefix">₹</span>
+                  <input type="number" id="partyBudget" required min="3000" step="500" value="15000" placeholder="e.g. 15000">
+                </div>
+                <small class="helper-text">Recommended: ₹5,000 – ₹1,00,000</small>
+              </div>
+
+              <div class="form-row-2">
+                <div class="input-field">
+                  <label for="partyOccasion">Occasion</label>
+                  <select id="partyOccasion">
+                    <option value="Birthday Celebration" selected>Birthday Celebration</option>
+                    <option value="Anniversary Party">Anniversary Party</option>
+                    <option value="Housewarming Gathering">Housewarming Gathering</option>
+                    <option value="Friends Reunion">Friends Reunion</option>
+                    <option value="Farewell Party">Farewell Party</option>
+                    <option value="Corporate Team Dinner">Corporate Team Dinner</option>
+                  </select>
+                </div>
+
+                <div class="input-field">
+                  <label for="partyGuests">Number of Guests</label>
+                  <input type="number" id="partyGuests" required min="2" max="200" value="15">
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="input-field">
+                  <label for="partyVenue">Venue Type</label>
+                  <select id="partyVenue">
+                    <option value="OYO Townhouse Party Suite" selected>OYO Townhouse / Hotel Suite</option>
+                    <option value="Home / Terrace Setup">Home / Terrace Setup</option>
+                    <option value="Outdoor Lawn / Garden">Outdoor Lawn / Garden</option>
+                    <option value="Boutique Banquet Hall">Boutique Banquet Hall</option>
+                  </select>
+                </div>
+
+                <div class="input-field">
+                  <label for="partyCity">City / Location</label>
+                  <select id="partyCity">
+                    <option value="Bangalore" selected>Bangalore</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Delhi NCR">Delhi NCR</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Pune">Pune</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-field">
+                <label for="partyCuisine">Food &amp; Catering (Swiggy / Zomato)</label>
+                <select id="partyCuisine">
+                  <option value="North Indian Platters & Starters" selected>North Indian Platters &amp; Starters</option>
+                  <option value="Biryani Tubs & Mughlai Starters">Biryani Tubs &amp; Mughlai Starters</option>
+                  <option value="Gourmet Pizzas, Sliders & Tacos">Gourmet Pizzas, Sliders &amp; Tacos</option>
+                  <option value="Continental Finger Foods & Mocktails">Continental Finger Foods &amp; Mocktails</option>
+                  <option value="Asian Wok & Dim Sum Party Boxes">Asian Wok &amp; Dim Sum Party Boxes</option>
+                </select>
+              </div>
+
+              <div class="input-field">
+                <label>Decor &amp; Entertainment Elements</label>
+                <div class="checkbox-pills">
+                  <label class="check-pill"><input type="checkbox" name="partyDecor" value="Metallic Balloon Arch" checked> <span>Balloon Theme Arch</span></label>
+                  <label class="check-pill"><input type="checkbox" name="partyDecor" value="LED Fairy Lights" checked> <span>LED Fairy Backdrop</span></label>
+                  <label class="check-pill"><input type="checkbox" name="partyDecor" value="Photobooth Props" checked> <span>Photobooth Props</span></label>
+                  <label class="check-pill"><input type="checkbox" name="partyDecor" value="Party Games Box" checked> <span>Party Games Box</span></label>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-primary party-btn full-width" id="btnGenParty">
+                <span>✦ Generate Party Budget Plan</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Result -->
+          <div class="result-card" id="partyResultContainer">
+            <div class="result-placeholder" id="partyPlaceholder">
+              <div class="placeholder-icon party">🎉</div>
+              <h3>Your Party Budget Plan</h3>
+              <p>Configure guest count, food choices, and venue to generate a curated party plan with Swiggy/Zomato food and OYO booking estimates.</p>
+            </div>
+
+            <div class="result-content hidden" id="partyResultContent">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 5: JEWELRY BUDGET PLANNER
+         ======================================================== -->
+    <section id="view-jewelry-planner" class="view-panel">
+      <div class="planner-page-header jewelry-theme">
+        <div class="container">
+          <span class="page-tag jewelry">Style &amp; Fashion</span>
+          <h1 class="page-heading">Jewelry Budget Planner</h1>
+          <p class="page-subheading">Provides jewelry recommendations aligned with occasion and outfit style, using text and optional image inputs.</p>
+        </div>
+      </div>
+
+      <div class="container section-pad">
+        <div class="form-result-layout">
+          <!-- Form -->
+          <div class="form-card">
+            <h3 class="form-card-title">1. Occasion &amp; Outfit Pairing</h3>
+
+            <form id="jewelryPlannerForm">
+              <div class="input-field">
+                <label for="jewelryBudget">Total Jewelry Budget (₹) *</label>
+                <div class="input-with-prefix">
+                  <span class="prefix">₹</span>
+                  <input type="number" id="jewelryBudget" required min="2000" step="500" value="20000" placeholder="e.g. 20000">
+                </div>
+                <small class="helper-text">Recommended: ₹5,000 – ₹1,00,000</small>
+              </div>
+
+              <div class="form-row-2">
+                <div class="input-field">
+                  <label for="jewelryOccasion">Occasion</label>
+                  <select id="jewelryOccasion">
+                    <option value="Wedding Reception" selected>Wedding Reception</option>
+                    <option value="Engagement Ceremony">Engagement Ceremony</option>
+                    <option value="Sangeet / Cocktail Night">Sangeet / Cocktail Night</option>
+                    <option value="Festive Celebration (Diwali/Eid)">Festive Celebration (Diwali/Eid)</option>
+                    <option value="Casual Chic / Office Wear">Casual Chic / Office Wear</option>
+                  </select>
+                </div>
+
+                <div class="input-field">
+                  <label for="jewelryMaterial">Jewelry Material Style</label>
+                  <select id="jewelryMaterial">
+                    <option value="Kundan & 18K Gold Plated" selected>Kundan &amp; 18K Gold Plated</option>
+                    <option value="Sterling Silver 925">Sterling Silver 925</option>
+                    <option value="American Diamond (CZ) Solitaire">American Diamond (CZ) Solitaire</option>
+                    <option value="Oxidized Antique Silver">Oxidized Antique Silver</option>
+                    <option value="Rose Gold Contemporary">Rose Gold Contemporary</option>
+                    <option value="Polki & Pearl Royal">Polki &amp; Pearl Royal</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-field">
+                <label for="jewelryOutfit">Outfit Description &amp; Color Scheme *</label>
+                <input type="text" id="jewelryOutfit" required value="Royal Navy Blue Silk Saree with Antique Gold Zari" placeholder="e.g. Emerald Green Velvet Lehenga with Sweetheart Neckline">
+              </div>
+
+              <!-- Upload Outfit Image (Optional) -->
+              <div class="input-field">
+                <label>Upload Outfit Image (Optional)</label>
+                <div class="file-drop-zone" id="dropZone">
+                  <input type="file" id="outfitImageInput" accept="image/*" class="file-input-hidden">
+                  <div class="drop-content" id="dropContent">
+                    <span class="drop-icon">📷</span>
+                    <p><strong>Click to upload</strong> or drag and drop outfit photo</p>
+                    <small>Supports PNG, JPG, WebP up to 5MB for AI visual style matching</small>
+                  </div>
+                  <div class="image-preview-box hidden" id="imagePreviewBox">
+                    <img id="imagePreviewImg" src="" alt="Outfit Preview">
+                    <button type="button" class="btn-remove-img" id="btnRemoveImg">✕ Remove</button>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-primary jewelry-btn full-width" id="btnGenJewelry">
+                <span>✦ Get Recommendations</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Result -->
+          <div class="result-card" id="jewelryResultContainer">
+            <div class="result-placeholder" id="jewelryPlaceholder">
+              <div class="placeholder-icon jewelry">💍</div>
+              <h3>Your Personalized Jewelry Recommendations</h3>
+              <p>Enter your outfit description and budget to get coordinated necklace, earring, and bracelet suggestions matched by Gemini style insights.</p>
+            </div>
+
+            <div class="result-content hidden" id="jewelryResultContent">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 6: RECOMMENDATION HISTORY PAGE
+         ======================================================== -->
+    <section id="view-history" class="view-panel">
+      <div class="planner-page-header">
+        <div class="container">
+          <span class="page-tag">Archive &amp; Review</span>
+          <h1 class="page-heading">Recommendation History</h1>
+          <p class="page-subheading">Displays a log of the user's past recommendation queries and results, allowing easy review and reuse of previous plans.</p>
+        </div>
+      </div>
+
+      <div class="container section-pad">
+        <!-- Filter Tabs -->
+        <div class="history-filter-bar">
+          <div class="filter-pills" id="historyFilters">
+            <button class="filter-pill active" data-filter="all">All Plans (<span id="countAll">0</span>)</button>
+            <button class="filter-pill" data-filter="home">Home Interior (<span id="countHome">0</span>)</button>
+            <button class="filter-pill" data-filter="party">Party Packages (<span id="countParty">0</span>)</button>
+            <button class="filter-pill" data-filter="jewelry">Jewelry Styling (<span id="countJewelry">0</span>)</button>
+          </div>
+          <button class="btn-secondary sm" id="btnRefreshHistory">↻ Refresh</button>
+        </div>
+
+        <!-- History Grid -->
+        <div class="history-cards-grid" id="historyGrid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="empty-state-card hidden" id="historyEmptyState">
+          <div class="empty-icon">🗂</div>
+          <h3>No Saved Plans Yet</h3>
+          <p>Generate recommendations in any of the planners and save them to review here anytime.</p>
+          <a href="#home-planner" class="btn-primary sm" data-nav="home-planner">Start a Home Plan</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 7: TESTIMONIALS PAGE
+         ======================================================== -->
+    <section id="view-testimonials" class="view-panel">
+      <div class="planner-page-header">
+        <div class="container">
+          <span class="page-tag">User Reviews</span>
+          <h1 class="page-heading">Testimonials &amp; Success Stories</h1>
+          <p class="page-subheading">Showcases real user reviews and success stories to demonstrate the platform's budgeting effectiveness.</p>
+        </div>
+      </div>
+
+      <div class="container section-pad">
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">
+              "PocketSmart saved me so much time! I furnished my entire 2 BHK living room within ₹50,000 using the IKEA & Amazon combination. The itemized lighting and BLDC fan recommendations were spot on."
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">P</div>
+              <div>
+                <strong class="author-name">Priya S.</strong>
+                <span class="author-meta">Home Decor Planner User · Bangalore</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">
+              "Planned my brother's 25th birthday party for 15 friends under ₹15,000! The Swiggy gourmet combo and OYO Townhouse booking suggestions fit our budget with ₹800 left over as savings."
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">R</div>
+              <div>
+                <strong class="author-name">Rahul M.</strong>
+                <span class="author-meta">Party Budget Planner User · Mumbai</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">
+              "The jewelry recommendation tool matched my navy blue silk saree with the perfect Tanishq Mia kundan choker and CaratLane earrings. Uploading my outfit photo made the color analysis super accurate!"
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">A</div>
+              <div>
+                <strong class="author-name">Ananya K.</strong>
+                <span class="author-meta">Jewelry Planner User · Hyderabad</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">
+              "As an event manager hosting small corporate mixers, having Swiggy and Zomato platter pricing pre-calculated per guest saves hours of manual menu drafting."
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">V</div>
+              <div>
+                <strong class="author-name">Vikram R.</strong>
+                <span class="author-meta">Corporate Event Host · Delhi NCR</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">
+              "I love that each recommendation links straight to IKEA or Amazon with exact unit prices. No hidden costs or wild guesswork."
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">S</div>
+              <div>
+                <strong class="author-name">Sneha T.</strong>
+                <span class="author-meta">Interior Design Enthusiast · Pune</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="testimonial-text">
+              "Found a gorgeous GIVA 925 silver ring and matching kada for my engagement lehenga under ₹12,000. Looked like high-end diamond jewelry at a fraction of the cost."
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">M</div>
+              <div>
+                <strong class="author-name">Meera B.</strong>
+                <span class="author-meta">Bridal Planner User · Chennai</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 8: LOGIN PAGE
+         ======================================================== -->
+    <section id="view-login" class="view-panel">
+      <div class="auth-page-container">
+        <div class="auth-card">
+          <div class="auth-brand">
+            <span class="auth-logo">✦</span>
+            <h2>PocketSmart</h2>
+            <p class="auth-sub">AI-Powered Budget Planning</p>
+          </div>
+
+          <h3 class="auth-title">Welcome Back</h3>
+          <p class="auth-note">Sign in to access your dashboard and saved recommendation plans.</p>
+
+          <form id="loginForm">
+            <div class="input-field">
+              <label for="loginUsername">Username</label>
+              <div class="input-with-icon">
+                <span class="field-icon">👤</span>
+                <input type="text" id="loginUsername" required value="sai" placeholder="Enter your username">
+              </div>
+            </div>
+
+            <div class="input-field">
+              <div class="label-row">
+                <label for="loginPassword">Password</label>
+                <a href="#login" class="forgot-link" onclick="alert('Demo Mode: Any password is accepted for testing!')">Forgot Password?</a>
+              </div>
+              <div class="input-with-icon">
+                <span class="field-icon">🔒</span>
+                <input type="password" id="loginPassword" required value="password123" placeholder="Enter your password">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary full-width">Sign In →</button>
+
+            <div class="auth-switch">
+              Don't have an account? <a href="#register" data-nav="register">Create Account</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 9: REGISTER PAGE
+         ======================================================== -->
+    <section id="view-register" class="view-panel">
+      <div class="auth-page-container">
+        <div class="auth-card">
+          <div class="auth-brand">
+            <span class="auth-logo">✦</span>
+            <h2>PocketSmart</h2>
+            <p class="auth-sub">AI-Powered Budget Planning</p>
+          </div>
+
+          <h3 class="auth-title">Create Your Account</h3>
+          <p class="auth-note">Allows new users to create an account to access personalized budget recommendations.</p>
+
+          <form id="registerForm">
+            <div class="input-field">
+              <label for="regUsername">Username</label>
+              <div class="input-with-icon">
+                <span class="field-icon">👤</span>
+                <input type="text" id="regUsername" required placeholder="Choose a username (e.g. aswin)">
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label for="regEmail">Email</label>
+              <div class="input-with-icon">
+                <span class="field-icon">✉</span>
+                <input type="email" id="regEmail" required placeholder="Enter your email address">
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label for="regPassword">Password</label>
+              <div class="input-with-icon">
+                <span class="field-icon">🔒</span>
+                <input type="password" id="regPassword" required minlength="6" placeholder="Create a strong password">
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label for="regConfirmPassword">Confirm Password</label>
+              <div class="input-with-icon">
+                <span class="field-icon">🔒</span>
+                <input type="password" id="regConfirmPassword" required minlength="6" placeholder="Confirm your password">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary full-width">Create Account ✦</button>
+
+            <div class="auth-switch">
+              Already have an account? <a href="#login" data-nav="login">Sign In</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Detail Modal for Viewing Saved Recommendation Plans -->
+  <dialog id="planDetailModal" class="app-dialog">
+    <div class="dialog-card">
+      <button class="dialog-close" id="btnCloseModal">✕</button>
+      <div id="modalPlanContent">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ========================================================
+       FOOTER PART (Matching Video)
+       ======================================================== -->
+  <footer class="app-footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-icon sm">✦</span>
+          <strong>PocketSmart</strong>
+        </div>
+        <p class="footer-desc">
+          AI-Powered Budget Planning for Everyday Needs. Intelligent multi-platform optimization for home decor, event packages, and jewelry styling.
+        </p>
+      </div>
+
+      <div class="footer-links-group">
+        <div class="footer-col">
+          <h4>Planners</h4>
+          <a href="#home-planner" data-nav="home-planner">Home Interior</a>
+          <a href="#party-planner" data-nav="party-planner">Party Packages</a>
+          <a href="#jewelry-planner" data-nav="jewelry-planner">Jewelry Styling</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <a href="#dashboard" data-nav="dashboard">User Dashboard</a>
+          <a href="#history" data-nav="history">Saved History</a>
+          <a href="#testimonials" data-nav="testimonials">Testimonials</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Account</h4>
+          <a href="#login" data-nav="login">Sign In</a>
+          <a href="#register" data-nav="register">Register</a>
+          <a href="#dashboard" data-nav="dashboard">Preferences</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <span>© 2026 PocketSmart AI. Built with HTML, CSS, JavaScript &amp; Python.</span>
+        <span>All merchant trademarks (IKEA, Amazon, Swiggy, Zomato, OYO, Tanishq, CaratLane) belong to their respective owners.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Pure JavaScript Client Logic -->
   <script src="/static/app.js"></script>
 </body>
 </html>

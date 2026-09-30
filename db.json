@@ -1,17 +1,394 @@
 {
   "transactions": [
     {
-      "id": "tx1",
-      "amount": 50,
-      "description": "Coffee",
+      "id": "tx-1",
+      "amount": 4850,
+      "description": "Tech Lead Monthly Salary",
+      "type": "income",
+      "category": "Income",
+      "date": "2026-09-01"
+    },
+    {
+      "id": "tx-2",
+      "amount": 750,
+      "description": "UI Architecture Consulting",
+      "type": "income",
+      "category": "Income",
+      "date": "2026-09-15"
+    },
+    {
+      "id": "tx-3",
+      "amount": 1550,
+      "description": "Downtown Apartment Lease",
+      "type": "expense",
+      "category": "Housing & Rent",
+      "date": "2026-09-02"
+    },
+    {
+      "id": "tx-4",
+      "amount": 340.50,
+      "description": "Whole Foods Market Groceries",
+      "type": "expense",
+      "category": "Groceries",
+      "date": "2026-09-08"
+    },
+    {
+      "id": "tx-5",
+      "amount": 88,
+      "description": "City Electric & Gas Utility",
+      "type": "expense",
+      "category": "Utilities & Bills",
+      "date": "2026-09-14"
+    },
+    {
+      "id": "tx-6",
+      "amount": 75,
+      "description": "Fiber Gigabit Internet",
+      "type": "expense",
+      "category": "Utilities & Bills",
+      "date": "2026-09-10"
+    },
+    {
+      "id": "tx-7",
+      "amount": 85,
+      "description": "Metropolitan Climbing Gym",
+      "type": "expense",
+      "category": "Health & Fitness",
+      "date": "2026-09-22"
+    },
+    {
+      "id": "tx-8",
+      "amount": 64.20,
+      "description": "Blue Bottle Coffee & Lunches",
       "type": "expense",
       "category": "Dining & Cafes",
-      "date": "2026-09-28"
+      "date": "2026-09-26"
     }
   ],
-  "categories": [],
-  "goals": [],
-  "bills": [],
-  "currency": "USD",
-  "updatedAt": "2026-09-28T18:14:31.165Z"
+  "categories": [
+    {
+      "id": "cat-1",
+      "category": "Housing & Rent",
+      "monthlyLimit": 1650,
+      "color": "#3b82f6",
+      "alertThreshold": 0.9
+    },
+    {
+      "id": "cat-2",
+      "category": "Groceries",
+      "monthlyLimit": 450,
+      "color": "#10b981",
+      "alertThreshold": 0.85
+    },
+    {
+      "id": "cat-3",
+      "category": "Dining & Cafes",
+      "monthlyLimit": 350,
+      "color": "#f59e0b",
+      "alertThreshold": 0.8
+    },
+    {
+      "id": "cat-4",
+      "category": "Transportation",
+      "monthlyLimit": 250,
+      "color": "#8b5cf6",
+      "alertThreshold": 0.85
+    },
+    {
+      "id": "cat-5",
+      "category": "Utilities & Bills",
+      "monthlyLimit": 220,
+      "color": "#06b6d4",
+      "alertThreshold": 0.9
+    },
+    {
+      "id": "cat-6",
+      "category": "Entertainment & Tech",
+      "monthlyLimit": 200,
+      "color": "#ec4899",
+      "alertThreshold": 0.8
+    },
+    {
+      "id": "cat-7",
+      "category": "Shopping",
+      "monthlyLimit": 300,
+      "color": "#f43f5e",
+      "alertThreshold": 0.8
+    },
+    {
+      "id": "cat-8",
+      "category": "Health & Fitness",
+      "monthlyLimit": 150,
+      "color": "#14b8a6",
+      "alertThreshold": 0.85
+    }
+  ],
+  "goals": [
+    {
+      "id": "goal-1",
+      "title": "Emergency Reserve (6 Mos)",
+      "targetAmount": 18000,
+      "currentAmount": 13500,
+      "deadline": "2026-12-31",
+      "category": "Safety",
+      "color": "#10b981"
+    },
+    {
+      "id": "goal-2",
+      "title": "Summer Trip to Kyoto & Tokyo",
+      "targetAmount": 4200,
+      "currentAmount": 2900,
+      "deadline": "2026-08-15",
+      "category": "Travel",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "goal-3",
+      "title": "Modern Workstation & Display",
+      "targetAmount": 2500,
+      "currentAmount": 1750,
+      "deadline": "2026-11-20",
+      "category": "Equipment",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "goal-4",
+      "title": "Roth IRA Annual Max",
+      "targetAmount": 7000,
+      "currentAmount": 4800,
+      "deadline": "2026-12-31",
+      "category": "Investments",
+      "color": "#f59e0b"
+    }
+  ],
+  "bills": [
+    {
+      "id": "bill-1",
+      "name": "Apartment Lease",
+      "amount": 1550,
+      "frequency": "monthly",
+      "dueDay": 1,
+      "category": "Housing & Rent",
+      "autoPaid": true,
+      "isActive": true
+    },
+    {
+      "id": "bill-2",
+      "name": "Gigabit Fiber Internet",
+      "amount": 75,
+      "frequency": "monthly",
+      "dueDay": 8,
+      "category": "Utilities & Bills",
+      "autoPaid": true,
+      "isActive": true
+    },
+    {
+      "id": "bill-3",
+      "name": "Electric & Gas Utility",
+      "amount": 88,
+      "frequency": "monthly",
+      "dueDay": 14,
+      "category": "Utilities & Bills",
+      "autoPaid": true,
+      "isActive": true
+    },
+    {
+      "id": "bill-4",
+      "name": "Streaming Bundle (Netflix & Prime)",
+      "amount": 32,
+      "frequency": "monthly",
+      "dueDay": 18,
+      "category": "Entertainment & Tech",
+      "autoPaid": true,
+      "isActive": true
+    },
+    {
+      "id": "bill-5",
+      "name": "Gym & Bouldering Membership",
+      "amount": 85,
+      "frequency": "monthly",
+      "dueDay": 22,
+      "category": "Health & Fitness",
+      "autoPaid": true,
+      "isActive": true
+    },
+    {
+      "id": "bill-6",
+      "name": "Spotify & Cloud Backup",
+      "amount": 24,
+      "frequency": "monthly",
+      "dueDay": 25,
+      "category": "Entertainment & Tech",
+      "autoPaid": true,
+      "isActive": true
+    }
+  ],
+  "currency": "INR",
+  "users": [
+    {
+      "username": "sai",
+      "email": "sai@example.com",
+      "name": "Sai Kumar"
+    },
+    {
+      "username": "aswin",
+      "email": "aswin@example.com",
+      "name": "Aswin Mukesh R"
+    }
+  ],
+  "pocketHistory": [
+    {
+      "id": "hist-1",
+      "type": "home",
+      "title": "2 BHK Modern Minimalist Home Decor",
+      "budget": 50000,
+      "allocated": 48500,
+      "remaining": 1500,
+      "currency": "₹",
+      "date": "2026-09-28",
+      "details": {
+        "rooms": "2 BHK",
+        "style": "Modern Minimalist",
+        "retailers": ["IKEA", "Amazon", "Urban Ladder"],
+        "sections": [
+          {
+            "category": "Lighting",
+            "allocation": 5000,
+            "items": [
+              { "name": "IKEA Solklint Pendant Lamp", "desc": "Warm ambient glass pendant for dining & living", "price": 1890, "qty": 1, "platform": "IKEA", "url": "https://www.ikea.com" },
+              { "name": "Wipro 20W Smart LED Batten", "desc": "Tunable white light with app and voice control", "price": 899, "qty": 2, "platform": "Amazon", "url": "https://www.amazon.in" },
+              { "name": "Philips Hue Warm Floor Lamp", "desc": "Corner accent lighting for reading area", "price": 1312, "qty": 1, "platform": "Amazon", "url": "https://www.amazon.in" }
+            ]
+          },
+          {
+            "category": "Ceiling Fans",
+            "allocation": 7000,
+            "items": [
+              { "name": "Atomberg Renesa 1200mm BLDC Fan", "desc": "5-star energy saving with remote & sleep mode", "price": 3699, "qty": 1, "platform": "Amazon", "url": "https://www.amazon.in" },
+              { "name": "Havells Stealth Air Premium Fan", "desc": "Ultra-silent aerodynamic blades for master bedroom", "price": 3300, "qty": 1, "platform": "Flipkart", "url": "https://www.flipkart.com" }
+            ]
+          },
+          {
+            "category": "Furniture",
+            "allocation": 28000,
+            "items": [
+              { "name": "IKEA KIVIK Compact 2-Seater Sofa", "desc": "Durable anthracite fabric with memory foam cushions", "price": 18990, "qty": 1, "platform": "IKEA", "url": "https://www.ikea.com" },
+              { "name": "Urban Ladder Sheesham Wood Coffee Table", "desc": "Minimalist walnut finish with lower magazine shelf", "price": 5490, "qty": 1, "platform": "Urban Ladder", "url": "https://www.urbanladder.com" },
+              { "name": "AmazonBasics Engineered Wood TV Unit", "desc": "Sleek wall console fitting up to 55-inch display", "price": 3520, "qty": 1, "platform": "Amazon", "url": "https://www.amazon.in" }
+            ]
+          }
+        ],
+        "suggestions": [
+          "Consider multi-functional furniture like storage ottomans for better cost-per-sqft utility.",
+          "Check IKEA Family member discounts and Amazon Great Indian Festival coupons before final checkout.",
+          "Prioritize primary lighting fixtures first; add decorative floor lights in subsequent phases."
+        ]
+      }
+    },
+    {
+      "id": "hist-2",
+      "type": "party",
+      "title": "Friends Birthday Celebration (15 Guests)",
+      "budget": 15000,
+      "allocated": 14200,
+      "remaining": 800,
+      "currency": "₹",
+      "date": "2026-09-27",
+      "details": {
+        "guests": 15,
+        "occasion": "Birthday Celebration",
+        "venue": "OYO Townhouse Party Suite",
+        "sections": [
+          {
+            "category": "Catering & Refreshments",
+            "allocation": 7500,
+            "items": [
+              { "name": "Swiggy Gourmet Party Platters", "desc": "15x Deluxe Veg & Non-Veg mini burger & taco combos", "price": 4200, "qty": 1, "platform": "Swiggy", "url": "https://www.swiggy.com" },
+              { "name": "Zomato Biryani & Starter Buckets", "desc": "Hyderabadi Dum Biryani party tub + chicken kebab box", "price": 2400, "qty": 1, "platform": "Zomato", "url": "https://www.zomato.com" },
+              { "name": "Soft Drinks, Mocktail Mixers & Ice", "desc": "Assorted sodas, fresh lime cordial & ice packs", "price": 900, "qty": 1, "platform": "Blinkit", "url": "https://www.blinkit.com" }
+            ]
+          },
+          {
+            "category": "Venue & Space",
+            "allocation": 4000,
+            "items": [
+              { "name": "OYO Townhouse Party Suite (4 Hours)", "desc": "Air-conditioned private terrace lounge with sound system", "price": 4000, "qty": 1, "platform": "OYO", "url": "https://www.oyorooms.com" }
+            ]
+          },
+          {
+            "category": "Decor & Lighting",
+            "allocation": 1800,
+            "items": [
+              { "name": "Metallic Chrome Balloon Arch & Banner", "desc": "Black and gold theme set with hand pump and tape", "price": 850, "qty": 1, "platform": "Amazon", "url": "https://www.amazon.in" },
+              { "name": "Warm White Fairy Curtain Lights (3x3m)", "desc": "USB-powered backdrop lighting for photo booth", "price": 950, "qty": 1, "platform": "Amazon", "url": "https://www.amazon.in" }
+            ]
+          },
+          {
+            "category": "Entertainment & Music",
+            "allocation": 900,
+            "items": [
+              { "name": "Party Games Box & Photo Booth Props", "desc": "Trivia cards, masquerade masks and photobooth kit", "price": 900, "qty": 1, "platform": "Amazon", "url": "https://www.amazon.in" }
+            ]
+          }
+        ],
+        "suggestions": [
+          "Pre-schedule your Swiggy / Zomato orders 3 hours in advance to avoid peak delivery delays.",
+          "Check OYO policy for guest entry rules and outside catering permissions upon check-in.",
+          "Use a shared Spotify Group Session playlist so all 15 guests can queue their favorite songs."
+        ]
+      }
+    },
+    {
+      "id": "hist-3",
+      "type": "jewelry",
+      "title": "Wedding Reception Gold & Kundan Set",
+      "budget": 20000,
+      "allocated": 18500,
+      "remaining": 1500,
+      "currency": "₹",
+      "date": "2026-09-25",
+      "details": {
+        "occasion": "Wedding Reception",
+        "outfit": "Royal Navy Blue Silk Saree with Antique Gold Zari",
+        "material": "Kundan & 18K Gold Plated",
+        "outfitAnalysis": "The royal navy blue silk creates high-contrast luxury when paired with antique kundan and warm gold tones. An open collar choker accentuates the saree's traditional zari border without overwhelming the neckline.",
+        "sections": [
+          {
+            "category": "Necklace & Choker",
+            "allocation": 8500,
+            "items": [
+              { "name": "Tanishq Mia Gold Plated Kundan Choker", "desc": "Intricate floral motif with emerald green drop beads", "price": 8500, "qty": 1, "platform": "Tanishq", "url": "https://www.tanishq.co.in" }
+            ]
+          },
+          {
+            "category": "Earrings & Maang Tikka",
+            "allocation": 4500,
+            "items": [
+              { "name": "CaratLane Meenakari Chandbalis", "desc": "Lightweight chandelier earrings with cultured pearls", "price": 4500, "qty": 1, "platform": "CaratLane", "url": "https://www.caratlane.com" }
+            ]
+          },
+          {
+            "category": "Bangles & Bracelet",
+            "allocation": 3500,
+            "items": [
+              { "name": "Voylla 2-Piece Antique Kada Set", "desc": "Embossed peacock carved bangles with screw clasp", "price": 3500, "qty": 1, "platform": "Amazon", "url": "https://www.amazon.in" }
+            ]
+          },
+          {
+            "category": "Statement Ring",
+            "allocation": 2000,
+            "items": [
+              { "name": "GIVA 925 Silver Gold Plated Solitaire Ring", "desc": "Adjustable statement band with rose-cut centerpiece", "price": 2000, "qty": 1, "platform": "GIVA", "url": "https://www.giva.co" }
+            ]
+          }
+        ],
+        "stylingTips": [
+          "Follow the 'Rule of Two': Since the choker is heavy, keep hand accessories to just one statement kada per wrist.",
+          "Match your hair accessory (pins or floral gajra) to the warm gold plating of the chandbalis.",
+          "Apply perfume and hair spray before wearing plated jewelry to preserve the luster."
+        ]
+      }
+    }
+  ],
+  "updatedAt": "2026-09-30T01:50:00.000Z"
 }
