@@ -1,20 +1,51 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.12 1.87 1.34 0 1.95-.78 1.95-1.57 0-1.12-1.01-1.63-2.91-2.27-2.31-.77-3.25-1.96-3.25-3.37 0-1.79 1.4-3.05 3.4-3.42V4h2.67v1.94c1.64.39 2.8 1.5 2.92 3.19h-1.95c-.13-.88-.79-1.64-1.89-1.64-1.19 0-1.83.67-1.83 1.5 0 1.03.95 1.55 2.85 2.19 2.37.8 3.32 1.96 3.32 3.49 0 1.88-1.48 3.13-3.47 3.48z'/></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AISmartBudget</title>
-    <meta name="description" content="AI-Powered Budget Management &amp; Financial Assistant with intelligent expense tracking, automated category insights, smart budget forecasting, and savings goal planning." />
-    <meta property="og:title" content="AISmartBudget" />
-    <meta property="og:description" content="AI-Powered Budget Management &amp; Financial Assistant with intelligent expense tracking, automated category insights, smart budget forecasting, and savings goal planning." />
-    <meta property="og:type" content="website" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-slate-950 text-slate-100 antialiased font-sans min-h-screen selection:bg-emerald-500/30 selection:text-emerald-300">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI-powered budget management and financial assistant">
+  <title>AISmartBudget — Money, made clear</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#dashboard"><span class="brand-mark">✦</span><span>Smart<span>Budget</span></span></a>
+      <nav aria-label="Main navigation">
+        <a class="nav-link active" href="#dashboard" data-view="dashboard"><span>⌂</span> Dashboard</a>
+        <a class="nav-link" href="#transactions" data-view="transactions"><span>↕</span> Transactions</a>
+        <a class="nav-link" href="#planner" data-view="planner"><span>◒</span> Budget planner</a>
+        <a class="nav-link" href="#assistant" data-view="assistant"><span>✧</span> AI assistant</a>
+      </nav>
+      <div class="sidebar-bottom"><div class="tip-card"><span class="tip-icon">☀</span><strong>Small steps add up</strong><p>Track one expense today. Your future self will thank you.</p></div><button class="ghost-button" id="resetData">↺ Reset demo data</button></div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar"><div><p class="eyebrow">Tuesday, September 30, 2026</p><h1 id="pageTitle">Good morning, Viswa <span>✦</span></h1></div><div class="top-actions"><button class="icon-button" title="Notifications">♢<i></i></button><div class="avatar">V</div></div></header>
+
+      <section id="dashboard" class="view active-view">
+        <div class="hero-row"><div><h2>Your money at a glance</h2><p class="muted">Here is how your finances are looking this month.</p></div><button class="primary-button" id="addExpenseBtn">＋ Add transaction</button></div>
+        <div class="stat-grid">
+          <article class="stat-card income"><div class="stat-label"><span class="dot"></span> Money in <span class="card-menu">•••</span></div><strong id="incomeTotal">$0.00</strong><small>↑ <b>Income received</b> this month</small></article>
+          <article class="stat-card expense"><div class="stat-label"><span class="dot"></span> Money out <span class="card-menu">•••</span></div><strong id="expenseTotal">$0.00</strong><small>↓ <b>Spent</b> this month</small></article>
+          <article class="stat-card balance"><div class="stat-label"><span class="dot"></span> Left to spend <span class="card-menu">•••</span></div><strong id="balanceTotal">$0.00</strong><small id="savingsLabel">Your monthly balance</small></article>
+        </div>
+        <div class="dashboard-grid"><article class="panel spending-panel"><div class="panel-heading"><div><h3>Spending overview</h3><p class="muted">Your expenses by category</p></div><select id="periodSelect"><option>This month</option><option>Last month</option></select></div><div class="chart-wrap"><div class="donut" id="donut"><div class="donut-center"><strong id="donutTotal">$0</strong><span>Total spent</span></div></div><div class="legend" id="legend"></div></div></article><article class="panel health-panel"><div class="panel-heading"><div><h3>Money health</h3><p class="muted">A simple view of your progress</p></div><span class="health-badge">Good</span></div><div class="health-score"><div class="score-ring"><strong id="healthScore">0</strong><span>/ 100</span></div><div><strong id="healthMessage">Add income and expenses</strong><p class="muted">Keep tracking to unlock helpful insights.</p></div></div><div class="progress-row"><span>Savings rate</span><b id="savingsRate">0%</b></div><div class="progress"><i id="savingsProgress"></i></div><div class="coach-note"><span>✧</span><p><b>Smart tip</b><br>Try to keep at least 20% of your income for future goals.</p></div></article></div>
+        <article class="panel transactions-panel"><div class="panel-heading"><div><h3>Recent transactions</h3><p class="muted">Your latest money activity</p></div><a href="#transactions" class="text-button">View all →</a></div><div class="table-wrap"><table><thead><tr><th>DESCRIPTION</th><th>CATEGORY</th><th>DATE</th><th class="align-right">AMOUNT</th></tr></thead><tbody id="recentTransactions"></tbody></table></div></article>
+      </section>
+
+      <section id="transactions" class="view"><div class="hero-row"><div><h2>Transactions</h2><p class="muted">Every dollar, accounted for.</p></div><button class="primary-button" id="addExpenseBtn2">＋ Add transaction</button></div><article class="panel"><div class="table-wrap"><table><thead><tr><th>DESCRIPTION</th><th>CATEGORY</th><th>DATE</th><th>TYPE</th><th class="align-right">AMOUNT</th><th></th></tr></thead><tbody id="allTransactions"></tbody></table></div></article></section>
+
+      <section id="planner" class="view"><div class="hero-row"><div><h2>Budget planner</h2><p class="muted">Build a practical plan for any goal.</p></div></div><div class="planner-grid"><article class="panel planner-form"><h3>Plan your budget</h3><p class="muted">Use the 50/30/20 rule as a starting point.</p><label>Monthly budget<input id="planBudget" type="number" value="3000" min="1"></label><label>What are you planning for?<input id="planGoal" value="A calmer month"></label><button class="primary-button full" id="planBtn">Create my plan ✦</button></article><article class="panel result-panel" id="planResult"><div class="empty-state"><span>✦</span><h3>Your plan will appear here</h3><p class="muted">Enter a budget and goal to get a simple breakdown.</p></div></article></div></section>
+
+      <section id="assistant" class="view"><div class="hero-row"><div><h2>AI assistant</h2><p class="muted">Ask a question about your money. Get a clear answer.</p></div></div><article class="panel chat-panel"><div class="chat-messages" id="chatMessages"><div class="message assistant"><span>✦</span><p>Hi! I’m your money coach. Ask me how to save, understand your spending, or plan a goal.</p></div></div><form class="chat-form" id="chatForm"><input id="chatInput" placeholder="e.g. How can I save more this month?" autocomplete="off"><button class="primary-button">Send</button></form></article></section>
+    </main>
+  </div>
+
+  <dialog id="transactionDialog"><form method="dialog" class="modal-form" id="transactionForm"><button class="close-button" value="cancel">×</button><h2>Add transaction</h2><p class="muted">Keep your money picture up to date.</p><label>Description<input name="description" required placeholder="Coffee with friends"></label><div class="form-row"><label>Amount<input name="amount" type="number" min="0.01" step="0.01" required placeholder="25.00"></label><label>Type<select name="type"><option value="expense">Expense</option><option value="income">Income</option></select></label></div><label>Category<select name="category"><option>Dining & Cafes</option><option>Groceries</option><option>Housing & Rent</option><option>Transportation</option><option>Utilities & Bills</option><option>Shopping</option><option>Entertainment & Tech</option><option>Health & Fitness</option><option>Income</option></select></label><label>Date<input name="date" type="date" required></label><button class="primary-button full" value="default">Save transaction</button></form></dialog>
+  <script src="/static/app.js"></script>
+</body>
 </html>

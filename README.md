@@ -1,11 +1,16 @@
-<div align="center">
+# AISmartBudget
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+AISmartBudget is now a lightweight HTML, CSS, JavaScript, and Python application. The TypeScript/React build is no longer required to run the product.
 
-  <h1>Built with AI Studio</h2>
+## Run locally
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
+pip install -r requirements.txt
+python main.py
+```
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+Open http://localhost:8000.
 
-</div>
+The Python FastAPI server serves the frontend, persists transactions in `db.json`, and provides budget planning and assistant endpoints. No API key is required for the local rule-based assistant.
