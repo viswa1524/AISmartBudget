@@ -34,6 +34,12 @@
         <a href="#testimonials" class="nav-item" data-nav="testimonials">Testimonials</a>
       </nav>
 
+      <!-- Gemini AI Status Indicator -->
+      <div class="ai-status-pill" id="aiStatusPill" title="Connected to Google Gemini AI">
+        <span class="ai-pulse-dot"></span>
+        <span class="ai-status-text">Gemini AI Active</span>
+      </div>
+
       <!-- User Auth State -->
       <div class="nav-auth" id="navAuth">
         <div class="user-pill hidden" id="userPill">
@@ -882,6 +888,56 @@
     </section>
 
   </main>
+
+  <!-- Floating Gemini AI Assistant Trigger -->
+  <button class="floating-ai-btn" id="floatingAiBtn" aria-label="Open PocketSmart Gemini AI Assistant">
+    <div class="ai-sparkle-ring">✦</div>
+    <div class="ai-btn-caption">
+      <span class="ai-btn-title">Ask Gemini AI</span>
+      <span class="ai-btn-badge">Smart Budget Coach</span>
+    </div>
+  </button>
+
+  <!-- Interactive Gemini AI Chat Dock -->
+  <div class="ai-chat-dock hidden" id="aiChatDock">
+    <div class="ai-chat-header">
+      <div class="ai-header-left">
+        <div class="ai-avatar">✦</div>
+        <div>
+          <div class="ai-header-title">PocketSmart Gemini AI</div>
+          <div class="ai-header-status">
+            <span class="ai-live-dot"></span>
+            <span>Online · Connected to Gemini</span>
+          </div>
+        </div>
+      </div>
+      <button class="ai-chat-close" id="btnCloseAiChat" title="Close AI Chat">✕</button>
+    </div>
+
+    <!-- Quick Prompt Pills -->
+    <div class="ai-quick-prompts">
+      <button class="prompt-chip" data-prompt="How do I furnish a 2 BHK apartment on a ₹50,000 budget?">🏠 Furnish 2 BHK with ₹50k</button>
+      <button class="prompt-chip" data-prompt="What is the best way to split a party budget between Swiggy food and an OYO venue?">🎉 Party split for food & venue</button>
+      <button class="prompt-chip" data-prompt="What jewelry matches a navy blue silk saree with gold zari?">💍 Jewelry for navy silk saree</button>
+      <button class="prompt-chip" data-prompt="How can I save 20% on my monthly expenses effortlessly?">💡 Save 20% every month</button>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="ai-chat-messages" id="aiChatMessages">
+      <div class="chat-bubble ai">
+        <div class="bubble-sender">PocketSmart Gemini AI</div>
+        <p>Hello! I am your AI financial and shopping budget coach. Ask me anything about home interior deals (IKEA, Amazon), party food platters (Swiggy, Zomato), OYO venues, or outfit jewelry styling.</p>
+      </div>
+    </div>
+
+    <!-- Chat Input Form -->
+    <form class="ai-chat-input-bar" id="aiChatForm">
+      <input type="text" id="aiChatInput" placeholder="Ask Gemini AI for budget advice..." autocomplete="off" required>
+      <button type="submit" class="ai-chat-send-btn" id="btnSendAiChat" title="Send Question">
+        <span>Send ↗</span>
+      </button>
+    </form>
+  </div>
 
   <!-- Detail Modal for Viewing Saved Recommendation Plans -->
   <dialog id="planDetailModal" class="app-dialog">

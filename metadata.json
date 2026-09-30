@@ -1,0 +1,7 @@
+{
+  "name": "PocketSmart AI: Your Smart Budget Planner",
+  "description": "AI-Powered Budget Planning for Everyday Needs. Optimize home decor with IKEA/Amazon, parties with Swiggy/Zomato/OYO, and jewelry tailored to your outfit with Gemini AI.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

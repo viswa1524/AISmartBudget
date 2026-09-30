@@ -1,0 +1,12 @@
+{
+  "name": "pocketsmart-ai",
+  "private": true,
+  "version": "1.0.0",
+  "description": "PocketSmart AI - AI-Powered Budget Planning for Everyday Needs",
+  "scripts": {
+    "dev": "python3 main.py",
+    "start": "python3 main.py",
+    "build": "python3 -m py_compile main.py",
+    "lint": "python3 -m py_compile main.py"
+  }
+}
