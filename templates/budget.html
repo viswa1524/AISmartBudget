@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Budget - PocketSmart AI{% endblock %}
+{% block content %}
+<h1>
+  <svg class="heading-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9"/>
+    <circle cx="12" cy="12" r="5"/>
+    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+  </svg>
+  <span>Monthly Budget</span>
+</h1>
+
+{% if error %}
+<div class="alert alert-error">
+  <svg class="alert-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="12" y1="8" x2="12" y2="12"/>
+    <line x1="12" y1="16" x2="12.01" y2="16"/>
+  </svg>
+  <span>{{ error }}</span>
+</div>
+{% endif %}
+
+{% if summary.warning %}
+<div class="alert alert-warning">
+  <svg class="alert-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+  <span>{{ summary.warning }}</span>
+</div>
+{% endif %}
+
+<div class="panel">
+  <h2>
+    <svg class="panel-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+    <span>Set Monthly Budget</span>
+  </h2>
+  <form method="post" action="/budget/update" class="form-grid">
+    <label>Monthly Budget Amount (₹)
+      <input type="number" name="monthly_budget" step="0.01" min="0" value="{{ summary.budget }}" required>
+    </label>
+    <button type="submit" class="btn full">
+      <svg class="btn-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      <span>Update Budget Target</span>
+    </button>
+  </form>
+</div>
+
+<div class="panel">
+  <h2>
+    <svg class="panel-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <span>Budget Usage & Thresholds</span>
+  </h2>
+  <div class="progress-track">
+    <div class="progress-fill {% if summary.budget_used_pct >= 100 %}danger{% elif summary.budget_used_pct >= 80 %}warn{% endif %}"
+         style="width: {{ [summary.budget_used_pct, 100] | min }}%;"></div>
+  </div>
+  <p>₹{{ "%.2f"|format(summary.total_expenses) }} spent of ₹{{ "%.2f"|format(summary.budget) }}
+     ({{ summary.budget_used_pct }}%)</p>
+  <p>Remaining budget:
+    <strong>₹{{ "%.2f"|format(summary.budget - summary.total_expenses) }}</strong>
+  </p>
+</div>
+{% endblock %}

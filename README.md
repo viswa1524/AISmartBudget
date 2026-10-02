@@ -1,40 +1,29 @@
-# AISmartBudget
+# PocketSmart AI – Smart Budget & Recommendation Assistant
 
-AISmartBudget is a lightweight HTML, CSS, JavaScript, and Python application for budget planning.
+A web-based personal budget management application with AI-powered
+recommendations, built with FastAPI, SQLAlchemy, and Google's Gemini AI.
 
-## Runtime architecture
+## Description
 
-The production website is the Python/FastAPI application:
+PocketSmart AI lets a user log income and categorized expenses, set a
+monthly budget, see a live dashboard of their finances, and get
+personalized AI budgeting tips based on their actual spending data.
 
-- `main.py` serves the root `index.html` and the `/static` assets.
-- `static/app.js` provides navigation, authentication, planners, and history interactions.
-- `static/style.css` provides the website styling.
-- `db.json` is the local persistence store.
+## Features
 
-The old React/TypeScript implementation and the duplicate `public/static` asset copy are not part of this runtime. Keep them only if you still need the legacy Node/Vite build; otherwise remove them in a local clone or through the GitHub web editor.
+- Dashboard: total income, total expenses, remaining balance, current
+  budget, recent transactions, category breakdown, budget-usage bar.
+- Income management: add/view/delete income entries.
+- Expense management: add/view/delete categorized expenses.
+- Budget management: set a monthly budget, see usage %, get a warning
+  near/over budget.
+- AI recommendations: on-demand Gemini-powered budgeting tips based on
+  the user's real data.
 
-## Run locally
+## Technologies Used
 
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
-pip install -r requirements.txt
-python main.py
-```
-
-Open <http://localhost:8000>.
-
-The FastAPI server provides the planner, authentication, and recommendation-history endpoints. The application uses rule-based planning and does not require an API key for local development.
-
-## Files that are part of the website
-
-```text
-index.html
-main.py
-db.json
-static/app.js
-static/style.css
-requirements.txt
-```
-
-`templates/`, `tools/`, `src/`, `server.ts`, `package.json`, `vite.config.ts`, `tsconfig*.json`, `bun.lock`, and `public/` are legacy/auxiliary files for the current Python-served website and can be removed when the Node/Vite version is no longer needed.
+- Python (FastAPI)
+- Jinja2 templates
+- HTML5 / CSS3 / vanilla JavaScript
+- SQLite + SQLAlchemy
+- Google Gemini Generative AI API

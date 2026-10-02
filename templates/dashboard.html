@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - PocketSmart AI{% endblock %}
+{% block content %}
+<h1>
+  <svg class="heading-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="3" y="3" width="7" height="9" rx="1.5"/>
+    <rect x="14" y="3" width="7" height="5" rx="1.5"/>
+    <rect x="14" y="12" width="7" height="9" rx="1.5"/>
+    <rect x="3" y="16" width="7" height="5" rx="1.5"/>
+  </svg>
+  <span>Dashboard</span>
+</h1>
+
+{% if summary.warning %}
+<div class="alert alert-warning">
+  <svg class="alert-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+  <span>{{ summary.warning }}</span>
+</div>
+{% endif %}
+
+<div class="cards">
+  <div class="card">
+    <h3>
+      <svg class="card-outline-icon income" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+        <polyline points="17 6 23 6 23 12"/>
+      </svg>
+      <span>Total Income</span>
+    </h3>
+    <p class="amount income">₹{{ "%.2f"|format(summary.total_income) }}</p>
+  </div>
+  <div class="card">
+    <h3>
+      <svg class="card-outline-icon expense" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+        <polyline points="17 18 23 18 23 12"/>
+      </svg>
+      <span>Total Expenses</span>
+    </h3>
+    <p class="amount expense">₹{{ "%.2f"|format(summary.total_expenses) }}</p>
+  </div>
+  <div class="card">
+    <h3>
+      <svg class="card-outline-icon balance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <span>Remaining Balance</span>
+    </h3>
+    <p class="amount {% if summary.remaining_balance < 0 %}expense{% else %}income{% endif %}">
+      ₹{{ "%.2f"|format(summary.remaining_balance) }}
+    </p>
+  </div>
+  <div class="card">
+    <h3>
+      <svg class="card-outline-icon budget" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/>
+        <circle cx="12" cy="12" r="5"/>
+        <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+      </svg>
+      <span>Monthly Budget</span>
+    </h3>
+    <p class="amount">₹{{ "%.2f"|format(summary.budget) }}</p>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>
+    <svg class="panel-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <span>Budget Usage</span>
+  </h2>
+  <div class="progress-track">
+    <div class="progress-fill {% if summary.budget_used_pct >= 100 %}danger{% elif summary.budget_used_pct >= 80 %}warn{% endif %}"
+         style="width: {{ [summary.budget_used_pct, 100] | min }}%;"></div>
+  </div>
+  <p>{{ summary.budget_used_pct }}% of budget used</p>
+</div>
+
+<div class="panel">
+  <h2>
+    <svg class="panel-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+      <line x1="7" y1="7" x2="7.01" y2="7"/>
+    </svg>
+    <span>Spending by Category</span>
+  </h2>
+  {% if summary.category_summary %}
+    <div class="bar-chart">
+    {% for cat, amt in summary.category_summary.items() %}
+      <div class="bar-row">
+        <span class="bar-label">{{ cat }}</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width: {{ (amt / summary.total_expenses * 100) if summary.total_expenses else 0 }}%;"></div>
+        </div>
+        <span class="bar-value">₹{{ "%.2f"|format(amt) }}</span>
+      </div>
+    {% endfor %}
+    </div>
+  {% else %}
+    <p class="empty">No expenses recorded yet.</p>
+  {% endif %}
+</div>
+
+<div class="two-col">
+  <div class="panel">
+    <h2>
+      <svg class="panel-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <polyline points="19 12 12 19 5 12"/>
+      </svg>
+      <span>Recent Income</span>
+    </h2>
+    {% if recent_income %}
+    <table>
+      <thead><tr><th>Date</th><th>Source</th><th>Amount</th></tr></thead>
+      <tbody>
+      {% for i in recent_income %}
+        <tr><td>{{ i.date }}</td><td>{{ i.source }}</td><td>₹{{ "%.2f"|format(i.amount) }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="empty">No income recorded yet.</p>{% endif %}
+    <a href="/income" class="link-more">
+      <span>View all income</span>
+      <svg class="inline-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+
+  <div class="panel">
+    <h2>
+      <svg class="panel-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="12" y1="19" x2="12" y2="5"/>
+        <polyline points="5 12 12 5 19 12"/>
+      </svg>
+      <span>Recent Expenses</span>
+    </h2>
+    {% if recent_expenses %}
+    <table>
+      <thead><tr><th>Date</th><th>Category</th><th>Amount</th></tr></thead>
+      <tbody>
+      {% for e in recent_expenses %}
+        <tr><td>{{ e.date }}</td><td>{{ e.category }}</td><td>₹{{ "%.2f"|format(e.amount) }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="empty">No expenses recorded yet.</p>{% endif %}
+    <a href="/expenses" class="link-more">
+      <span>View all expenses</span>
+      <svg class="inline-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+</div>
+{% endblock %}

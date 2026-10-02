@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}AI Recommendations - PocketSmart AI{% endblock %}
+{% block content %}
+<h1>
+  <svg class="heading-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 2L14.4 8.6L21 11L14.4 13.4L12 20L9.6 13.4L3 11L9.6 8.6L12 2Z"/>
+    <path d="M19 17l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z"/>
+  </svg>
+  <span>AI Budget Recommendations</span>
+</h1>
+
+<div class="panel">
+  <p>Get personalized saving tips and strategic budgeting advice based on your real financial data.</p>
+  <button id="get-recommendation-btn" class="btn" type="button">
+    <svg class="btn-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 2L14.4 8.6L21 11L14.4 13.4L12 20L9.6 13.4L3 11L9.6 8.6L12 2Z"/>
+      <path d="M19 17l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z"/>
+    </svg>
+    <span>Generate AI Insights</span>
+  </button>
+  <div id="recommendation-result" class="recommendation-box" style="display:none;"></div>
+</div>
+{% endblock %}

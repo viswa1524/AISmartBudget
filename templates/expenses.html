@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Expenses - PocketSmart AI{% endblock %}
+{% block content %}
+<h1>
+  <svg class="heading-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="2" y="5" width="20" height="14" rx="2.5"/>
+    <line x1="2" y1="10" x2="22" y2="10"/>
+    <line x1="6" y1="15" x2="9" y2="15"/>
+  </svg>
+  <span>Expense Management</span>
+</h1>
+
+{% if error %}
+<div class="alert alert-error">
+  <svg class="alert-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="12" y1="8" x2="12" y2="12"/>
+    <line x1="12" y1="16" x2="12.01" y2="16"/>
+  </svg>
+  <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="panel">
+  <h2>
+    <svg class="panel-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="16"/>
+      <line x1="8" y1="12" x2="16" y2="12"/>
+    </svg>
+    <span>Add New Expense</span>
+  </h2>
+  <form method="post" action="/expenses/add" class="form-grid">
+    <label>Category
+      <select name="category" required>
+        {% for c in categories %}
+        <option value="{{ c }}">{{ c }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Amount (₹)
+      <input type="number" name="amount" step="0.01" min="0.01" required placeholder="0.00">
+    </label>
+    <label>Date
+      <input type="date" name="date" required>
+    </label>
+    <label class="full">Description (optional)
+      <input type="text" name="description" maxlength="200" placeholder="e.g. Grocery store run">
+    </label>
+    <button type="submit" class="btn full">
+      <svg class="btn-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      <span>Save Expense</span>
+    </button>
+  </form>
+</div>
+
+<div class="panel">
+  <h2>
+    <svg class="panel-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <span>Expense History</span>
+    <span class="total-chip">Total: ₹{{ "%.2f"|format(total_expenses) }}</span>
+  </h2>
+  {% if expense_list %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th></th></tr></thead>
+    <tbody>
+    {% for e in expense_list %}
+      <tr>
+        <td>{{ e.date }}</td>
+        <td><span class="category-pill">{{ e.category }}</span></td>
+        <td>₹{{ "%.2f"|format(e.amount) }}</td>
+        <td>{{ e.description or "-" }}</td>
+        <td>
+          <form method="post" action="/expenses/delete/{{ e.id }}" onsubmit="return confirm('Delete this expense entry?');">
+            <button type="submit" class="btn-small btn-danger">
+              <svg class="btn-outline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              <span>Delete</span>
+            </button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}<p class="empty">No expenses recorded yet.</p>{% endif %}
+</div>
+{% endblock %}
